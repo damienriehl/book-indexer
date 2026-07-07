@@ -1,0 +1,205 @@
+# fixtures/golden_10_pages.yaml
+# QUAL-04 ground truth: 10 hand-verified the source book pages x 2-3
+# triples per page. Every triple asserts: verify(term, conn)
+# yields an Evidence with matching section_ref AND folio.
+#
+# HUMAN CHECKPOINT (Plan 02-04 Task 4.3): each triple below was
+# auto-drafted from the shipped index_evidence.json. Open the
+# PDF at each pdf_page and confirm the triple is truthful. Edit
+# or delete any triples that are wrong, then mark reviewed_by
+# + review_date in the metadata.
+#
+version: 1
+metadata:
+  source: Drafted from artifacts/index_evidence.json; every triple reflects what verify() currently returns. Hand-reviewed
+    in Plan 02-04 Task 4.3 (human checkpoint).
+  pdf_sha256: 94503c16dcc3ce29d64be1591fec85eb94b83c4452622cfd9676bb604e553070
+  ledger_sha256: 822165d8197a31b5ea2b23f14d84421d98be07b999c3bc31be0d9f5276dc867e
+  built_date: '2026-04-23'
+  reviewed_by: book-indexer maintainers
+  review_date: '2026-04-23'
+  triple_count: 26
+  page_count: 10
+triples:
+- pdf_page: 54
+  folio: '13'
+  term: deposition
+  section_ref: §1.07.13
+  match_mode: exact
+  token_offset: 352
+  verbatim_snippet: claims , indemnity chains , and overlapping facts , while another LLM workflow can align definitions...
+- pdf_page: 54
+  folio: '13'
+  term: foundation
+  section_ref: §1.07.13
+  match_mode: exact
+  token_offset: 264
+  verbatim_snippet: and defense , while an element - evidence map can link needed exhibits and testimony . AI can help s...
+- pdf_page: 54
+  folio: '13'
+  term: hearsay
+  section_ref: §1.07.13
+  match_mode: exact
+  token_offset: 262
+  verbatim_snippet: each claim and defense , while an element - evidence map can link needed exhibits and testimony . AI...
+- pdf_page: 80
+  folio: '39'
+  term: FRE
+  section_ref: §3.16.4
+  match_mode: exact
+  token_offset: 325
+  verbatim_snippet: ', Administrative , and Arbitral Notice Facts that are indisputable or highly authoritative and widel...'
+- pdf_page: 80
+  folio: '39'
+  term: deposition
+  section_ref: §3.16.4
+  match_mode: exact
+  token_offset: 150
+  verbatim_snippet: civil cases , the previous testimony of a witness who is not available may be presented as substanti...
+- pdf_page: 80
+  folio: '39'
+  term: discovery
+  section_ref: §3.16.4
+  match_mode: exact
+  token_offset: 79
+  verbatim_snippet: against that party . The party seeking to introduce admissions must affirmatively offer them into ev...
+- pdf_page: 101
+  folio: '60'
+  term: prejudicial
+  section_ref: §1.06.3
+  match_mode: exact
+  token_offset: 362
+  verbatim_snippet: be directed to the decision maker , and attorneys should avoid arguing directly with the opponent . ...
+- pdf_page: 101
+  folio: '60'
+  term: rebuttal
+  section_ref: §1.06.3
+  match_mode: exact
+  token_offset: 382
+  verbatim_snippet: and discourteous to interrupt . Incorrect statements that are unfairly prejudicial , bear no relatio...
+- pdf_page: 134
+  folio: '93'
+  term: exhibit
+  section_ref: §3.11.5
+  match_mode: exact
+  token_offset: 190
+  verbatim_snippet: ', a softer voice , and coherent gestures , can enrich the content of the summation . Movement by the...'
+- pdf_page: 134
+  folio: '93'
+  term: opening statement
+  section_ref: §3.11.5
+  match_mode: exact
+  token_offset: 45
+  verbatim_snippet: an attorney is in presenting a final argument , the greater the chance a favorable determination wil...
+- pdf_page: 153
+  folio: '112'
+  term: cross-examination
+  section_ref: §1.11.5
+  match_mode: exact
+  token_offset: 48
+  verbatim_snippet: evidence and consider what further examination is needed . 1.11.1 What Can Be Asked ? The direct exa...
+- pdf_page: 153
+  folio: '112'
+  term: direct examination
+  section_ref: §1.11.5
+  match_mode: exact
+  token_offset: 82
+  verbatim_snippet: Redirect allows the witness to clarify or explain points and to cover new material raised by the cro...
+- pdf_page: 153
+  folio: '112'
+  term: leading question
+  section_ref: §1.11.5
+  match_mode: exact
+  token_offset: 200
+  verbatim_snippet: to both direct and redirect examination . But , there may be greater latitude with using leading que...
+- pdf_page: 168
+  folio: '127'
+  term: exhibit
+  section_ref: §2.12.3
+  match_mode: exact
+  token_offset: 136
+  verbatim_snippet: ', and the cross - examiner is usually permitted to introduce extrinsic evidence to establish the imp...'
+- pdf_page: 168
+  folio: '127'
+  term: impeachment
+  section_ref: §2.12.3
+  match_mode: exact
+  token_offset: 26
+  verbatim_snippet: prior - inconsistent - statement foundations , including depositions and exhibits , and might track ...
+- pdf_page: 168
+  folio: '127'
+  term: redirect
+  section_ref: §2.12.3
+  match_mode: exact
+  token_offset: 214
+  verbatim_snippet: statements from the previous source be contemporaneously introduced in an effort to reduce the impac...
+- pdf_page: 185
+  folio: '144'
+  term: objection
+  section_ref: §1.03.2
+  match_mode: exact
+  token_offset: 90
+  verbatim_snippet: Concentrate on the evidence as it ’s being introduced • Listen and watch the examination attentively...
+- pdf_page: 185
+  folio: '144'
+  term: objections
+  section_ref: §1.03.1
+  match_mode: exact
+  token_offset: 30
+  verbatim_snippet: skill is learned and enhanced through practice and experience . Suggestions to increase the ability ...
+- pdf_page: 185
+  folio: '144'
+  term: overruled
+  section_ref: §1.03.2
+  match_mode: exact
+  token_offset: 254
+  verbatim_snippet: inadmissible and harmful , object . • If the evidence is probably inadmissible but not harmful , con...
+- pdf_page: 198
+  folio: '157'
+  term: FRE
+  section_ref: §2.05.1
+  match_mode: exact
+  token_offset: 64
+  verbatim_snippet: The judge , arbitrator , ALJ , or hearing officer , as the gate keeper , decides whether evidence is...
+- pdf_page: 198
+  folio: '157'
+  term: FRE 403
+  section_ref: §2.05.1
+  match_mode: exact
+  token_offset: 145
+  verbatim_snippet: prove a point or to support an issue ( FRE 401 ) . Relevant evidence may be excluded when the probat...
+- pdf_page: 198
+  folio: '157'
+  term: foundation
+  section_ref: §2.02.7
+  match_mode: exact
+  token_offset: 20
+  verbatim_snippet: • Irrelevant and unfairly prejudicial evidence • Privileged information • Lack of personal knowledge...
+- pdf_page: 211
+  folio: '170'
+  term: FRE
+  section_ref: §3.06.4
+  match_mode: exact
+  token_offset: 8
+  verbatim_snippet: 3.06.3 Statements of Personal or Family History ( FRE 804(b)(4 ) ) Statements regarding the personal...
+- pdf_page: 211
+  folio: '170'
+  term: hearsay
+  section_ref: §3.07.2
+  match_mode: exact
+  token_offset: 89
+  verbatim_snippet: words regarding the circumstances of the declarant ’s own death at the time that death is imminent a...
+- pdf_page: 226
+  folio: '185'
+  term: exhibit
+  section_ref: §4.07.6
+  match_mode: exact
+  token_offset: 38
+  verbatim_snippet: entered the website URL ( address ) in a reputable browser . • Website review . The witness reviewed...
+- pdf_page: 226
+  folio: '185'
+  term: foundation
+  section_ref: §4.07.6
+  match_mode: exact
+  token_offset: 223
+  verbatim_snippet: Artifacts and Documents ( AI Products , LLM Content , GenAI Images and Videos ) While the law has ye...

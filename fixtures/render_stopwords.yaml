@@ -1,0 +1,80 @@
+# B-06 union-of-token-lemmas stopword exclusion list.
+#
+# Phase 5's render/synthesize.py loads this YAML and skips any candidate
+# stem whose lemma matches a row in this set. Each entry carries a
+# provenance comment explaining WHY it was excluded; companion volumes
+# may override per-volume via Phase 6's --stopwords-file flag.
+#
+# Empirical baseline: RESEARCH §H-5 found 22 synthesis candidates on
+# the reference corpus after applying this stopword set; without it, ~30+
+# trivially-grouped stems (their/your/other/...) would surface.
+#
+# Phase 5 has NO author sign-off gate per RESEARCH §H-12 ("no author
+# sign-off gates") — this fixture is planner-empirical, NOT
+# PENDING_AUTHOR.
+
+metadata:
+  curated_by: planner-empirical
+  source: ".planning/phases/05-rendering-audit-artifacts/05-RESEARCH.md §H-5 STOPWORDS_EXCLUDE"
+  notes: |
+    Stopwords are corpus-dependent (Pitfall §P-7). the reference corpus uses this
+    set; companion volumes (Pretrial Litigation, Trial Advocacy) MAY override
+    per-volume. Phase 6 CLI exposes --stopwords-file flag.
+
+stopwords:
+  - lemma: their
+    reason: "function-word; trivially groups across legal phrases"
+  - lemma: your
+    reason: "function-word; appears in 'your case', 'your story', 'your witness'"
+  - lemma: other
+    reason: "function-word; groups disparate concepts"
+  - lemma: more
+    reason: "comparative; not a doctrinal stem"
+  - lemma: most
+    reason: "superlative; not a doctrinal stem"
+  - lemma: many
+    reason: "quantifier; not a doctrinal stem"
+  - lemma: much
+    reason: "quantifier; not a doctrinal stem"
+  - lemma: with
+    reason: "preposition lemma; not a doctrinal stem"
+  - lemma: from
+    reason: "preposition lemma; not a doctrinal stem"
+  - lemma: have
+    reason: "auxiliary verb lemma"
+  - lemma: will
+    reason: "modal verb lemma"
+  - lemma: that
+    reason: "demonstrative/relative pronoun"
+  - lemma: this
+    reason: "demonstrative pronoun"
+  - lemma: they
+    reason: "personal pronoun"
+  - lemma: them
+    reason: "personal pronoun (object)"
+  - lemma: what
+    reason: "interrogative/relative pronoun"
+  - lemma: when
+    reason: "interrogative/relative adverb"
+  - lemma: where
+    reason: "interrogative/relative adverb"
+  - lemma: which
+    reason: "interrogative/relative pronoun"
+  - lemma: about
+    reason: "preposition; not a doctrinal stem"
+  - lemma: also
+    reason: "adverb; conflicts with the (also: ...) parenthetical convention itself"
+  - lemma: only
+    reason: "adverb; not a doctrinal stem"
+  - lemma: very
+    reason: "adverb intensifier; not a doctrinal stem"
+  - lemma: make
+    reason: "common verb lemma; trivially groups (e.g., 'make argument', 'make objection')"
+  - lemma: take
+    reason: "common verb lemma"
+  - lemma: give
+    reason: "common verb lemma"
+  - lemma: show
+    reason: "common verb lemma"
+  - lemma: need
+    reason: "common verb lemma"

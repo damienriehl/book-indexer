@@ -1,0 +1,99 @@
+# Per-chapter rule-system mapping for D-06 bare-`Rule N` resolution.
+#
+# Phase 3b's regex_fallback.py resolves bare "Rule N" references by looking
+# up the active § N chapter and consulting this map:
+#   - rule_system: FRE | FRCP | FRAP | MRPC — bare "Rule N" → "{system} N"
+#   - rule_system: none — bare "Rule N" routes to a "Rule (unspecified) N"
+#     entry; not silently mapped to any default system.
+#   - An explicit prefix in the body (e.g., "Federal Rule of Civil Procedure 12"
+#     or "Model Rule 3.3") ALWAYS wins over the chapter inference.
+#
+# Hand-curated by the author (D-06). Adding/changing a row is a CONTEXT
+# amendment — planner cannot silently edit.
+#
+# Reference: chapter titles per fixtures/sections.yaml (level=0
+# sections; verified 2026-04-26 against the corpus chapter table).
+
+metadata:
+  curated_by: book-indexer maintainers
+  confirmed_at: 2026-04-27T01:24:51Z
+  pdf_sha256: 94503c16dcc3ce29d64be1591fec85eb94b83c4452622cfd9676bb604e553070
+  pdf_path: samples/synthetic_treatise.pdf
+  drafted_by: gsd-phase-executor (Phase 3b plan 03B-00, 2026-04-26)
+  drafted_method: |
+    Initial mapping from RESEARCH §H-16 — refined against the Phase 1
+    page_corpus.sqlite body-text scan (each chapter's rule-cite forms +
+    ethics indicators counted directly from the corpus). Chapter titles
+    are the canonical level-0 section titles from
+    fixtures/sections.yaml. Each row carries an inline
+    rationale grounded in observed body-text evidence.
+  confirmation_notes: |
+    Author sign-off 2026-04-27 (book-indexer maintainers):
+    - Chapter 1 AMENDED from `none` → `MRPC`. Corpus evidence: 10× "Model
+      Rule", 2× "MRPC", 6× bare "Rule 3" with every hit preceded by
+      "Model" (e.g., "Model Rule 3.1", "Model Rule 3.4(c)"). Default for
+      bare "Rule N" in chapter 1 now resolves to Model Rules of
+      Professional Conduct. Plan 02 (regex_fallback.py) MUST add an MRPC
+      pattern to honor this mapping.
+    - Chapters 2-5 APPROVED as drafted (FRCP, FRE, FRE, FRCP).
+
+chapters:
+  - chapter: 1
+    title: "Planning to Win: Effective Preparation"
+    rule_system: MRPC
+    status: CONFIRMED
+    rationale: |
+      Foundational chapter on case planning + ethics. Corpus scan shows
+      MRPC dominance: 10× "Model Rule", 2× "MRPC", and 6× bare "Rule 3"
+      where EVERY instance is preceded by "Model" (e.g., "Model Rule
+      3.1", "Model Rule 3.3(a)(3)", "Model Rule 3.4(c)"). Author signed
+      off 2026-04-27 amending the original draft (`none`) → `MRPC` so
+      that bare "Rule N" in this chapter routes to Model Rules of
+      Professional Conduct. Plan 02 (regex_fallback.py) MUST ship an
+      MRPC pattern to honor this mapping. Stray FRCP/FRE references in
+      this chapter (FRCP 50/53/54/58/59, FRE 614/103) appear with their
+      explicit prefix in the body text, so the explicit-prefix-wins
+      rule (D-06) keeps them correctly routed without per-cite override.
+
+  - chapter: 2
+    title: "Motion Practice, Opening Statements, and Summation"
+    rule_system: FRCP
+    status: CONFIRMED
+    rationale: |
+      Motion practice — bare "Rule N" most commonly refers to FRCP
+      (FRCP 12 motions, FRCP 50 JMOL, FRCP 56 summary judgment).
+      Corpus scan found ZERO bare "Rule N" hits in this chapter,
+      so the mapping only takes effect if Plan 02's extractor finds
+      one in expanded text passes.
+
+  - chapter: 3
+    title: "Examining Witnesses: Direct, Cross, and Expert Examinations"
+    rule_system: FRE
+    status: CONFIRMED
+    rationale: |
+      Witness examination — bare "Rule N" defaults to Federal Rules of
+      Evidence. Corpus scan confirms heavy FRE coverage: FRE 401-411
+      (relevance / character / subsequent remedial), FRE 602/603
+      (competency), FRE 701/702 (lay/expert opinion), FRE 803/804
+      (hearsay), FRE 901 (authentication).
+
+  - chapter: 4
+    title: "Evidence, Objections, and Exhibits"
+    rule_system: FRE
+    status: CONFIRMED
+    rationale: |
+      Primary evidence chapter — bare "Rule N" defaults to FRE. Corpus
+      scan dominated by FRE: 41× FRE 803, 17× FRE 611, 10× FRE 403,
+      9× FRE 401, 6× FRE 801/804(b), 4× FRE 901, plus FRE 104, 406,
+      410, 501, 601, 1001, 807. No competing rule system observed.
+
+  - chapter: 5
+    title: "Jury Trials"
+    rule_system: FRCP
+    status: CONFIRMED
+    rationale: |
+      Jury procedure — bare "Rule N" defaults to FRCP (FRCP 38 right to
+      jury, FRCP 39 mode, FRCP 47 voir dire, FRCP 48 jury number, FRCP
+      51 instructions). Corpus scan: 2× FRCP 47, 1× FRCP 51, 1× FRE
+      606. The single FRE reference always appears with the explicit
+      "FRE" prefix, so the FRCP default for bare "Rule N" is safe.

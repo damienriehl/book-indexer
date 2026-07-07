@@ -1,0 +1,67 @@
+# fixtures/legal_phrase_vocab.yaml
+# D-06: curated list of legal phrases confirmed present in the source book.
+# Used as the sampled_from(...) source for Hypothesis properties
+# (VER-05 + D-07 + D-08 + D-09).
+# phrases[0] == "voir dire" for shrink-friendliness (D-11).
+#
+# All phrases validated against artifacts/page_corpus.sqlite during Plan 02-03
+# via D-09 (every phrase MUST return >=1 Evidence against the live corpus).
+# If you edit this file, re-run
+#   uv run pytest tests/property/test_verify_live_corpus.py -k legal_phrase_vocab
+# to confirm every phrase is still present in the current the source book.
+
+version: 1
+metadata:
+  source: "CONTEXT.md D-06 seed list, validated against the source book in Plan 02-03"
+  built_date: "2026-04-22"
+  validated_date: "2026-04-23"
+  purpose: "Hypothesis sampled_from vocab + ship-level 'MUST index' spec"
+
+phrases:
+  # --- doctrine (voir dire FIRST for D-11 shrink-friendliness) ---
+  - {term: "voir dire",              category: doctrine,  expected_min_hits: 1}
+  - {term: "hearsay",                category: doctrine,  expected_min_hits: 1}
+  - {term: "motion in limine",       category: procedure, expected_min_hits: 1}
+  - {term: "impeachment",            category: doctrine,  expected_min_hits: 1}
+  - {term: "Federal Rules of Evidence", category: rule,   expected_min_hits: 1}
+  - {term: "FRE",                    category: rule,      expected_min_hits: 1}
+  - {term: "direct examination",     category: procedure, expected_min_hits: 1}
+  - {term: "cross-examination",      category: procedure, expected_min_hits: 1}
+  - {term: "opening statement",      category: procedure, expected_min_hits: 1}
+  - {term: "closing argument",       category: procedure, expected_min_hits: 1}
+  - {term: "objection",              category: procedure, expected_min_hits: 1}
+  - {term: "sustained",              category: procedure, expected_min_hits: 1}
+  - {term: "overruled",              category: procedure, expected_min_hits: 1}
+  - {term: "leading question",       category: procedure, expected_min_hits: 1}
+  - {term: "expert witness",         category: doctrine,  expected_min_hits: 1}
+  - {term: "authentication",         category: doctrine,  expected_min_hits: 1}
+  - {term: "hearsay exception",      category: doctrine,  expected_min_hits: 1}
+  - {term: "FRE 403",                category: rule,      expected_min_hits: 1}
+  - {term: "FRE 801",                category: rule,      expected_min_hits: 1}
+  - {term: "best evidence rule",     category: doctrine,  expected_min_hits: 1}
+  # --- latin (only terms confirmed present in the source book) ---
+  - {term: "prima facie",            category: latin,     expected_min_hits: 1}
+  - {term: "in limine",              category: latin,     expected_min_hits: 1}
+  - {term: "ex parte",               category: latin,     expected_min_hits: 1}
+  - {term: "nolo contendere",        category: latin,     expected_min_hits: 1}
+  # --- doctrine (hearsay exceptions) ---
+  - {term: "excited utterance",      category: doctrine,  expected_min_hits: 1}
+  - {term: "dying declaration",      category: doctrine,  expected_min_hits: 1}
+  # --- advocacy procedure (high-frequency in the source book) ---
+  - {term: "objections",             category: procedure, expected_min_hits: 1}
+  - {term: "exhibit",                category: procedure, expected_min_hits: 1}
+  - {term: "foundation",             category: procedure, expected_min_hits: 1}
+  - {term: "verdict",                category: procedure, expected_min_hits: 1}
+  - {term: "appeal",                 category: procedure, expected_min_hits: 1}
+  - {term: "rebuttal",               category: procedure, expected_min_hits: 1}
+  - {term: "discovery",              category: procedure, expected_min_hits: 1}
+  - {term: "deposition",             category: procedure, expected_min_hits: 1}
+  - {term: "redirect",               category: procedure, expected_min_hits: 1}
+  - {term: "peremptory",             category: procedure, expected_min_hits: 1}
+  # --- doctrine (evidentiary) ---
+  - {term: "prejudicial",            category: doctrine,  expected_min_hits: 1}
+  - {term: "probative",              category: doctrine,  expected_min_hits: 1}
+  - {term: "privilege",              category: doctrine,  expected_min_hits: 1}
+  - {term: "authenticity",           category: doctrine,  expected_min_hits: 1}
+  - {term: "mistrial",               category: doctrine,  expected_min_hits: 1}
+  - {term: "reputation",             category: doctrine,  expected_min_hits: 1}

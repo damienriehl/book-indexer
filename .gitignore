@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+# Envs
+.venv/
+.python-version.local
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.hypothesis/
+.mypy_cache/
+.pyright/
+# Pipeline outputs
+artifacts/
+*.sqlite
+# OS
+.DS_Store

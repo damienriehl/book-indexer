@@ -1,0 +1,161 @@
+# Per-acronym → spelled-out force-merge map for D-01 dedup.
+#
+# Phase 4's dedup.py reads this YAML once and force-merges the lemma bucket
+# of the acronym with the lemma bucket of the spelled-out form. Result:
+# "FRE" + "Federal Rules of Evidence" collapse to a single canonical
+# bucket; D-01 selects the spelled-out (longest) as canonical, the acronym
+# becomes a variant.
+#
+# Hand-curated by the author (D-01). Adding/changing a row is a
+# CONTEXT amendment — planner/executor cannot silently edit.
+#
+# Empirical body-text counts (from artifacts/page_corpus.sqlite, block_type=body)
+# are surfaced in the per-row `body_count` field as grounded evidence so the
+# author can decide which acronyms are "real" the source book concepts vs. one-offs.
+#
+# This fixture is DISTINCT from fixtures/acronym_seed.yaml:
+#   - acronym_seed.yaml is consumed by Phase 2 verify() acronym-mode matching
+#     (VER-02) — surface-form ↔ canonical pairs.
+#   - acronym_overrides.yaml is consumed by Phase 4 dedup.py for force-merge
+#     of acronym buckets ↔ spelled-out buckets at canonicalization time.
+#   Different consumers, different lifecycles. Overlap is harmless.
+
+metadata:
+  curated_by: book-indexer maintainers
+  confirmed_at: 2026-04-27T11:06:02Z
+  drafted_by: gsd-phase-executor (Phase 4 plan 04-00, 2026-04-26)
+  pdf_sha256: 94503c16dcc3ce29d64be1591fec85eb94b83c4452622cfd9676bb604e553070
+  pdf_path: samples/synthetic_treatise.pdf
+  drafted_method: |
+    Initial mapping from RESEARCH §H-2 (acronym detection findings) +
+    Open Question 2 + Phase 3a v2 noun_phrase candidates. Body-text
+    counts grounded against page_corpus.sqlite tokens (block_type=body)
+    on 2026-04-26. Acronyms with 0 body-text hits are RECOMMENDED but
+    REMOVABLE during sign-off — they may be carried for forward
+    coverage of companion volumes (Pretrial Litigation, Trial Advocacy).
+  notes: |
+    Acronyms with high body-text counts are confirmed the source book concepts:
+    FRE (221), AI (90), ALJ (37), LLM (36), FRCP (25), ESI (10).
+    Acronyms with 0 body-text hits are forward-coverage placeholders for
+    the companion volumes; the author may strike any during sign-off.
+  confirmation_notes: |
+    Author sign-off 2026-04-27 by book-indexer maintainers.
+
+    DECISION: Removed the `PI → preliminary injunction` row (1 row struck
+    from the 21-row draft, leaving 20 CONFIRMED rows).
+
+    Rationale: `PI` is highly ambiguous in legal prose — it commonly
+    expands to "private investigator" as well as "preliminary injunction",
+    and would also collide with statistical/scientific senses (e.g.
+    "principal investigator"). With 0 body-text hits in
+    page_corpus.sqlite (block_type=body), there is no the source book evidence
+    to disambiguate, so force-merging `PI` to `preliminary injunction`
+    in D-01 dedup would risk silently miscanonicalizing a different
+    sense in any companion volume that introduces it. Strike now;
+    re-add in a CONTEXT amendment if a future volume justifies it.
+
+    All other 20 rows ratified as drafted. Per-row schema is
+    {acronym, spelled_out, body_count, rationale} — no per-row
+    `status` field; metadata.curated_by + this confirmation_notes
+    block constitute the sign-off for the entire row set, mirroring
+    Phase 3b's chapter_rule_systems.yaml convention.
+
+acronyms:
+  # ─── Federal Rules (high-confidence; FRE/FRCP/FRAP are core the source book) ───
+  - acronym: FRE
+    spelled_out: Federal Rules of Evidence
+    body_count: 221
+    rationale: "core evidence cite; 41× FRE 803, 17× FRE 611, 10× FRE 403 in chapter 4"
+  - acronym: FRCP
+    spelled_out: Federal Rules of Civil Procedure
+    body_count: 25
+    rationale: "core procedural cite; FRCP 12/50/56 motion practice"
+  - acronym: FRAP
+    spelled_out: Federal Rules of Appellate Procedure
+    body_count: 2
+    rationale: "appellate procedure (rare in the source book; covers companion volume)"
+  - acronym: FRBP
+    spelled_out: Federal Rules of Bankruptcy Procedure
+    body_count: 0
+    rationale: "forward-coverage placeholder (companion volumes); REMOVABLE"
+  - acronym: FRCrP
+    spelled_out: Federal Rules of Criminal Procedure
+    body_count: 0
+    rationale: "forward-coverage placeholder (companion volumes); REMOVABLE"
+
+  # ─── Professional Conduct ───
+  - acronym: MRPC
+    spelled_out: Model Rules of Professional Conduct
+    body_count: 0
+    rationale: "0 bare 'MRPC' tokens but 10× 'Model Rule' + chapter 1 default; needed for D-01 force-merge if MRPC ever appears bare in companion volumes"
+
+  # ─── Adjudicators / Judgments ───
+  - acronym: ALJ
+    spelled_out: administrative law judge
+    body_count: 37
+    rationale: "high-confidence; 37 body hits + 9 spelled-out hits"
+  - acronym: JNOV
+    spelled_out: judgment notwithstanding the verdict
+    body_count: 0
+    rationale: "0 bare hits but 3× spelled-out form; legal idiom — KEEP for index canonicalization"
+  - acronym: JMOL
+    spelled_out: judgment as a matter of law
+    body_count: 1
+    rationale: "1 bare hit + 13× spelled-out form (judgment as a matter of law); FRCP 50 mechanism"
+
+  # ─── Pre-trial / Discovery ───
+  - acronym: MIL
+    spelled_out: motion in limine
+    body_count: 0
+    rationale: "0 bare hits but 10× spelled-out form; common the source book concept"
+  - acronym: SOL
+    spelled_out: statute of limitations
+    body_count: 0
+    rationale: "forward-coverage placeholder; REMOVABLE if author prefers spelled-out only"
+  - acronym: ESI
+    spelled_out: electronically stored information
+    body_count: 10
+    rationale: "10 bare hits + 14 spelled-out form; FRCP 26/34 discovery concept"
+
+  # ─── Statutory citations ───
+  - acronym: USC
+    spelled_out: United States Code
+    body_count: 0
+    rationale: "0 bare hits (always appears as 'U.S.C.' with periods); forward-coverage; REMOVABLE"
+  - acronym: CFR
+    spelled_out: Code of Federal Regulations
+    body_count: 0
+    rationale: "forward-coverage placeholder; REMOVABLE"
+
+  # ─── Tech / AI (the source book covers AI in evidence) ───
+  - acronym: AI
+    spelled_out: artificial intelligence
+    body_count: 90
+    rationale: "90 bare hits + 2× spelled-out form; the source book AI-in-evidence chapter"
+  - acronym: LLM
+    spelled_out: large language model
+    body_count: 36
+    rationale: "36 bare hits + 1× spelled-out form; the source book AI-in-evidence chapter"
+
+  # ─── Dispute resolution / Misc legal ───
+  - acronym: ADR
+    spelled_out: alternative dispute resolution
+    body_count: 1
+    rationale: "1 bare hit; forward-coverage if companion volumes expand"
+  - acronym: NDA
+    spelled_out: non-disclosure agreement
+    body_count: 0
+    rationale: "forward-coverage placeholder; REMOVABLE"
+  - acronym: TRO
+    spelled_out: temporary restraining order
+    body_count: 0
+    rationale: "forward-coverage placeholder; REMOVABLE"
+  # NOTE: Row `PI → preliminary injunction` was struck during author sign-off
+  # 2026-04-27 (book-indexer maintainers). Rationale: too ambiguous (private
+  # investigator / principal investigator collide with the legal sense)
+  # and 0 body-text hits in the source book to disambiguate. See
+  # metadata.confirmation_notes for the full decision record.
+  - acronym: USPTO
+    spelled_out: United States Patent and Trademark Office
+    body_count: 0
+    rationale: "forward-coverage placeholder; REMOVABLE"

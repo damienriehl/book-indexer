@@ -1,0 +1,104 @@
+# config/legal_lemma_overrides.yaml — curated Latin / multi-word legal phrases
+# spaCy's default lemmatizer mishandles. Seeded per CONTEXT D-18; extended during
+# Phase 1 inspection as the PDF reveals additional terms actually used in the source book.
+#
+# phrases: phrase-level overrides (applied BEFORE spaCy lemmatization)
+# tokens:  token-level overrides (applied AFTER spaCy lemmatization)
+phrases:
+  - phrase: "res judicata"
+    lemma: "res judicata"
+  - phrase: "voir dire"
+    lemma: "voir dire"
+  - phrase: "sua sponte"
+    lemma: "sua sponte"
+  - phrase: "mens rea"
+    lemma: "mens rea"
+  - phrase: "actus reus"
+    lemma: "actus reus"
+  - phrase: "stare decisis"
+    lemma: "stare decisis"
+  - phrase: "prima facie"
+    lemma: "prima facie"
+  - phrase: "in limine"
+    lemma: "in limine"
+  - phrase: "habeas corpus"
+    lemma: "habeas corpus"
+  - phrase: "amicus curiae"
+    lemma: "amicus curiae"
+  - phrase: "nolo contendere"
+    lemma: "nolo contendere"
+  - phrase: "pro se"
+    lemma: "pro se"
+  - phrase: "ex parte"
+    lemma: "ex parte"
+  - phrase: "in re"
+    lemma: "in re"
+
+  # B-10 hyphenated legal-domain terms (Phase 6 surface scan; counts in comments)
+  - phrase: "cross-examination"      # 100 occurrences (B-10 trigger)
+    lemma: "cross-examination"
+  - phrase: "cross-examinations"     # 4 occurrences (plural variant)
+    lemma: "cross-examination"
+  - phrase: "cross-examiner"         # 21 occurrences
+    lemma: "cross-examiner"
+  - phrase: "cross-examine"          # 9 occurrences
+    lemma: "cross-examine"
+  - phrase: "cross-examined"         # 3 occurrences (past tense)
+    lemma: "cross-examine"
+  - phrase: "cross-examining"        # 1 occurrence (gerund)
+    lemma: "cross-examine"
+  - phrase: "recross-examination"    # 4 occurrences
+    lemma: "recross-examination"
+  - phrase: "post-trial"             # 18 occurrences
+    lemma: "post-trial"
+  - phrase: "pre-trial"              # 2 occurrences
+    lemma: "pre-trial"
+  - phrase: "post-hearing"           # 3 occurrences
+    lemma: "post-hearing"
+  - phrase: "good-faith"             # 7 occurrences
+    lemma: "good-faith"
+  - phrase: "court-appointed"        # 6 occurrences
+    lemma: "court-appointed"
+  - phrase: "follow-up"              # 3 occurrences
+    lemma: "follow-up"
+  - phrase: "follow-ups"             # 4 occurrences (plural)
+    lemma: "follow-up"
+  - phrase: "multi-district"         # 4 occurrences
+    lemma: "multi-district"
+  - phrase: "multiple-situs"         # 2 occurrences
+    lemma: "multiple-situs"
+  - phrase: "single-situs"           # 2 occurrences
+    lemma: "single-situs"
+  - phrase: "common-sense"           # 3 occurrences
+    lemma: "common-sense"
+  - phrase: "non-leading"            # 3 occurrences
+    lemma: "non-leading"
+  - phrase: "self-interest"          # 4 occurrences
+    lemma: "self-interest"
+  - phrase: "self-incrimination"     # 2 occurrences
+    lemma: "self-incrimination"
+  - phrase: "self-authenticating"    # 2 occurrences
+    lemma: "self-authenticating"
+  - phrase: "self-serving"           # 2 occurrences
+    lemma: "self-serving"
+  - phrase: "co-counsel"             # 2 occurrences
+    lemma: "co-counsel"
+  - phrase: "re-introduction"        # 2 occurrences (chemistry / evidence-rule)
+    lemma: "re-introduction"
+
+tokens:
+  media: media
+  dicta: dictum
+  res: res
+
+  # Phase 8 v1.2 additions (sub-commit 08-W3-B; D-04 cascade (a)).
+  # Token-level overrides for spaCy verb-lemma collapses that produce
+  # corrupt canonicals in fixtures/zero_evidence_drops_classification.yaml::
+  # legitimate_coverage_gap entries with suggested_fix='lemma_override'.
+  # spaCy lemmatizes these gerund-as-modifier verbs to their root verb,
+  # producing canonicals like 'die declaration' / 'lose party' / 'prevail
+  # party' / 'continue objection' that don't match book usage.
+  dying: dying          # was 'die'  — covers 'dying declaration' (FRE 804(b)(2))
+  losing: losing        # was 'lose' — covers 'losing party' (FRCP 54(d))
+  prevailing: prevailing  # was 'prevail' — covers 'prevailing party' (FRCP 54(d))
+  continuing: continuing  # was 'continue' — covers 'continuing objection' (trial-practice doctrine)

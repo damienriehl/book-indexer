@@ -1,0 +1,14 @@
+# fixtures/acronym_seed.yaml
+# Canonical↔acronym pairs for the acronym-mode matcher (VER-02).
+# Plan 02-02 matcher + Plan 02-03 property tests consume this.
+# Acronym "surface form" is exactly how the acronym appears in the text.
+
+version: 1
+pairs:
+  - {canonical: "Federal Rules of Evidence",          acronyms: ["FRE"]}
+  - {canonical: "Federal Rules of Civil Procedure",   acronyms: ["FRCP"]}
+  - {canonical: "Federal Rules of Appellate Procedure", acronyms: ["FRAP"]}
+  - {canonical: "Federal Rules of Criminal Procedure", acronyms: ["FRCrP"]}
+  - {canonical: "United States Code",                 acronyms: ["USC", "U.S.C."]}
+  - {canonical: "Americans with Disabilities Act",    acronyms: ["ADA"]}
+  - {canonical: "Constitution of the United States",  acronyms: ["U.S. Const.", "Const."]}

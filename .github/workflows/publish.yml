@@ -1,0 +1,60 @@
+name: Publish to PyPI
+
+# PyPI Trusted Publishing (OIDC) + Sigstore attestations. NO API tokens are
+# stored in this repository. This workflow runs only when a GitHub Release is
+# published, so the first v0.1.0 publish is a deliberate, human-triggered act.
+#
+# One-time setup on PyPI (pending, author checkpoint):
+#   1. Reserve the project name and add a "pending publisher" for this repo:
+#      owner=OWNER, repository=book-indexer, workflow=publish.yml,
+#      environment=pypi.
+#   2. Create a GitHub environment named `pypi`.
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build distributions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Build sdist + wheel
+        run: uv build
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    name: Publish to PyPI (Trusted Publishing)
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/book-indexer/
+    permissions:
+      id-token: write        # OIDC token for Trusted Publishing
+      attestations: write     # Sigstore build provenance
+      contents: read
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Generate Sigstore attestations
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: "dist/*"
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          attestations: true

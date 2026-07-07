@@ -1,0 +1,38 @@
+book-indexer
+Copyright (C) 2026 book-indexer contributors
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU Affero General Public License, version 3, as published by
+the Free Software Foundation. See the LICENSE file for the full text.
+
+------------------------------------------------------------------------------
+Why AGPL-3.0 (and not a more permissive license)
+------------------------------------------------------------------------------
+
+book-indexer's default PDF-extraction backend is PyMuPDF (the `pymupdf`
+package, https://pymupdf.readthedocs.io/), which is distributed under the
+GNU AGPL-3.0. Because book-indexer links PyMuPDF as a required dependency,
+the combined work inherits AGPL-3.0 obligations. To keep the license claim
+honest and unambiguous, book-indexer itself is licensed AGPL-3.0-only.
+
+A future release plans to introduce a `PdfBackend` protocol with an MIT-licensed
+default backend (pdfplumber), at which point the book-indexer core can be
+re-licensed under MIT and PyMuPDF becomes an opt-in `[pymupdf]` extra. Until
+that abstraction ships, assume AGPL-3.0 governs any distribution of this
+package or a network service built on it.
+
+------------------------------------------------------------------------------
+Third-party components
+------------------------------------------------------------------------------
+
+- PyMuPDF (pymupdf) .......... GNU AGPL-3.0 — PDF text/character extraction
+- spaCy ...................... MIT — tokenization + NLP passes
+- eyecite .................... BSD-2-Clause — legal citation extraction
+- reporters-db / courts-db ... BSD-2-Clause — reporter + court metadata
+- pydantic ................... MIT — schema validation
+- typer ...................... MIT — CLI
+- python-docx ................ MIT — DOCX emit
+- pandas / matplotlib ........ BSD / PSF-compatible — audit artifacts
+
+Sample documents shipped under `samples/` are public-domain U.S. federal
+government edicts and synthetic content; see `samples/PROVENANCE.md`.

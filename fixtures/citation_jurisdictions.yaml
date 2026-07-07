@@ -1,0 +1,75 @@
+# Jurisdictions enabled for Phase 3b citation extraction.
+#
+# Per CONTEXT D-07: this file lists every jurisdiction whose statutes/rules
+# the Phase 3b extractor should attempt to extract from the manuscript.
+# USC + Federal Constitution are always-on; other jurisdictions are
+# enabled here only after a probe confirms at least one citation exists
+# in the source PDF.
+#
+# Adding a jurisdiction requires:
+#   1. Re-run the jurisdiction enumeration probe in
+#      .planning/phases/03B-citation-tables-pipeline/03B-RESEARCH.md §H-9.
+#   2. Confirm the probe finds ≥1 citation in the new corpus.
+#   3. Update `metadata.pdf_sha256` to point to the corpus probed.
+#   4. Commit alongside the new corpus's RESEARCH amendment.
+#
+# Do NOT add a jurisdiction speculatively. Empty-jurisdiction patterns in
+# reporters-db/courts-db inflate the false-positive surface significantly.
+
+metadata:
+  pdf_sha256: 94503c16dcc3ce29d64be1591fec85eb94b83c4452622cfd9676bb604e553070
+  pdf_path: samples/synthetic_treatise.pdf
+  built_by: gsd-phase-researcher (Phase 3b research, 2026-04-26)
+  built_method: |
+    1. Aggregated FullLawCitation.groups['reporter'] from eyecite over the
+       full PDF using PyMuPDF for raw page text.
+    2. Grepped for state-statute and state-rule abbreviation forms
+       (N.J., Cal., Tex., N.Y.).
+    3. Manually inspected UnknownCitation matched_text for state-shaped
+       patterns.
+    Empirical results: ZERO state-jurisdiction citations detected in
+    the reference corpus. Only USC (FullLawCitation) and one constitutional
+    Amendment reference ("Seventh Amendment") found.
+  pdf_extractor: PyMuPDF 1.27.2.2
+  eyecite_version: 2.7.6
+  reporters_db_version: 3.2.64
+  courts_db_version: 0.10.27
+
+jurisdictions:
+  # USC + Federal Constitution + federal procedural rules.
+  # Always-on per CONTEXT D-07 invariant ("USC + Federal Constitution,
+  # always-on"). Federal procedural rules are listed here for completeness
+  # but are extracted via regex_fallback.py — eyecite has 0 coverage on
+  # FRE/FRCP/FRAP per RESEARCH §H-1 (226 FRE / 25 FRCP / 1 FRAP regex hits
+  # vs. 0 eyecite hits on the source book).
+  - code: us
+    name: United States (federal)
+    enables:
+      statutes:
+        - U.S.C.        # eyecite FullLawCitation; primary
+        - U.S.C.A.      # West annotated; eyecite recognizes
+        - U.S.C.S.      # LexisNexis annotated; eyecite recognizes
+      constitution:
+        - U.S. Const.   # via regex_fallback.US_CONST_ART_PATTERN (article)
+        - Amendment     # via regex_fallback.AMENDMENT_PATTERN (1st-27th)
+      rules:
+        - FRE           # Federal Rules of Evidence (regex_fallback only)
+        - FRCP          # Federal Rules of Civil Procedure (regex_fallback only)
+        - FRAP          # Federal Rules of Appellate Procedure (regex_fallback only)
+        - FedRBankP     # Federal Rules of Bankruptcy Procedure (future-proof; not in v1.0 corpus)
+        - FedRCrimP     # Federal Rules of Criminal Procedure (future-proof; not in v1.0 corpus)
+
+  # No state jurisdictions detected in the source PDF.
+  # Examples that would appear here if probed and confirmed:
+  #
+  # - code: nj
+  #   name: New Jersey
+  #   enables:
+  #     statutes: [N.J. Rev. Stat., N.J.S.A.]
+  #     rules:    [N.J.R.E.]
+  #
+  # - code: ca
+  #   name: California
+  #   enables:
+  #     statutes: [Cal. Penal Code, Cal. Civ. Code, Cal. Evid. Code]
+  #     rules:    [Cal. R. Civ. P.]

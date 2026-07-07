@@ -1,0 +1,38 @@
+# book.toml — domain configuration for book-indexer
+#
+# This file separates *domain/corpus* configuration (which book you are
+# indexing, and the legal/editorial conventions it follows) from *package*
+# configuration (pyproject.toml). Point book-indexer at a copy of this file
+# to adapt it to a new treatise, jurisdiction, or citation style without
+# touching the package source.
+
+[book]
+# Human-readable label for the source volume being indexed.
+title = "Sample Treatise"
+# Default source PDF (relative to this file). Override on the CLI.
+source_pdf = "samples/synthetic_treatise.pdf"
+
+[sections]
+# Optional hand-verified section ground-truth fixture (YAML). When present,
+# section titles are excluded from the subject index and the resolver output
+# is cross-checked against it. Leave empty to fall through to no filtering.
+fixture = ""
+# Regex that identifies a section heading in the extracted text stream.
+# The default matches "§ 1.02" / "Chapter 3" style legal-treatise headings.
+heading_regex = '^(?:§\s*\d+(?:\.\d+)*|Chapter\s+\d+)\b'
+
+[folios]
+# Optional hand-verified printed-page (folio) ground-truth fixture (YAML).
+# The public citation is the *printed* folio, never the PDF page ordinal.
+fixture = ""
+
+[lemma]
+# Legal-lemma overrides steer the deterministic canonicalizer.
+overrides = "config/legal_lemma_overrides.yaml"
+
+[tables]
+# Citation-tables plugin to load from the `book_indexer.tables` entry-point
+# group. The bundled `legal-citations` plugin uses eyecite + reporters-db +
+# courts-db. Non-legal-domain plugins are on the roadmap.
+plugin = "legal-citations"
+jurisdictions = "fixtures/citation_jurisdictions.yaml"

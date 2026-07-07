@@ -1,0 +1,262 @@
+# fixtures/doctrinal_patterns.yaml
+# spaCy EntityRuler patterns for the Phase 3a v2 `doctrinal` pass (D-24 / D-30).
+#
+# IMMUTABILITY (D-30): never edit this file in place after first commit. To
+# revise, create `fixtures/doctrinal_patterns_v2.yaml` and bump the
+# `entity_ruler_pattern_sha` field in the symbolic-pass provenance sidecar
+# (Plan 03A-v2-02), busting the implicit doctrinal cache.
+#
+# Provenance (CON-05): every pattern derives from EXACTLY ONE of four sources,
+# all corpus-derived or rule-citation regex. External legal taxonomies
+# (Westlaw key numbers, MeSH legal subset, Black's Law Dictionary, …) are
+# explicitly NOT a source — see PROJECT.md "Out of Scope".
+#
+#   - SEED_LEMMA  : config/legal_lemma_overrides.yaml (Phase 1 D-18 — 14 entries)
+#   - SEED_VOCAB  : fixtures/legal_phrase_vocab.yaml  (Phase 2 D-06 — 42 entries)
+#   - INLINE_RULE : rule-citation regex/token patterns for FRE / FRCP / FRAP /
+#                   Fed. R. * / U.S.C.  (empirical token splits — see RESEARCH
+#                   §"Doctrinal Pattern Set Composition" lines 415-461 and H-2)
+#   - BOOK_NP     : corpus-derived noun phrases promoted via
+#                   scripts/inspect_top_noun_phrases.py output
+#
+# Pattern construction rules (RESEARCH §"Pattern syntax: three classes"):
+#   - Always use TOKEN patterns with `LOWER` (NEVER bare phrase strings — H-1
+#     PhraseMatcher default is case-sensitive ORTH, would miss "Hearsay" at
+#     sentence start).
+#   - Never include `the` / `a` / `an` LOWER tokens in patterns (H-6 — would
+#     displace NER on "the Court" → ORG).
+#   - Pattern `id` slug = `term.lower().replace(" ", "_").replace("-", "_")`,
+#     prefixed by source (`latin_…` / `vocab_…` / `…_rule` / `book_…`) so
+#     test_every_pattern_has_unique_id catches collisions.
+#   - For FRE / FRCP / FRAP / Fed. R. * / U.S.C. patterns, mirror the
+#     empirical token split documented in RESEARCH lines 415-419 — tokenizer
+#     drift across spaCy versions is caught by test_every_pattern_compiles.
+
+patterns:
+  # ===== SEED_LEMMA =====
+  # 14 entries from config/legal_lemma_overrides.yaml (Phase 1 D-18).
+  # All multi-word Latin doctrine terms; label LATIN; id prefix `latin_`.
+  - {id: "latin_voir_dire",       label: "LATIN", pattern: [{LOWER: "voir"}, {LOWER: "dire"}]}
+  - {id: "latin_mens_rea",        label: "LATIN", pattern: [{LOWER: "mens"}, {LOWER: "rea"}]}
+  - {id: "latin_actus_reus",      label: "LATIN", pattern: [{LOWER: "actus"}, {LOWER: "reus"}]}
+  - {id: "latin_stare_decisis",   label: "LATIN", pattern: [{LOWER: "stare"}, {LOWER: "decisis"}]}
+  - {id: "latin_prima_facie",     label: "LATIN", pattern: [{LOWER: "prima"}, {LOWER: "facie"}]}
+  - {id: "latin_in_limine",       label: "LATIN", pattern: [{LOWER: "in"}, {LOWER: "limine"}]}
+  - {id: "latin_habeas_corpus",   label: "LATIN", pattern: [{LOWER: "habeas"}, {LOWER: "corpus"}]}
+  - {id: "latin_amicus_curiae",   label: "LATIN", pattern: [{LOWER: "amicus"}, {LOWER: "curiae"}]}
+  - {id: "latin_nolo_contendere", label: "LATIN", pattern: [{LOWER: "nolo"}, {LOWER: "contendere"}]}
+  - {id: "latin_pro_se",          label: "LATIN", pattern: [{LOWER: "pro"}, {LOWER: "se"}]}
+  - {id: "latin_ex_parte",        label: "LATIN", pattern: [{LOWER: "ex"}, {LOWER: "parte"}]}
+  - {id: "latin_in_re",           label: "LATIN", pattern: [{LOWER: "in"}, {LOWER: "re"}]}
+  - {id: "latin_res_judicata",    label: "LATIN", pattern: [{LOWER: "res"}, {LOWER: "judicata"}]}
+  - {id: "latin_sua_sponte",      label: "LATIN", pattern: [{LOWER: "sua"}, {LOWER: "sponte"}]}
+
+  # ----- B-10 hyphenated legal-domain terms (Phase 6 surface scan; counts in plan
+  # 06-02). Phase 1 ``legal_phrase_merger`` produces a SINGLE hyphenated token
+  # for these entries (e.g. ``cross-examination`` is one token, not three),
+  # so each pattern is a single-token LOWER match. Slug discipline: replace
+  # ``-`` with ``_`` per slug rule. Source remains SEED_LEMMA per CON-05.
+  # The ``vocab_cross_examination`` pattern below uses the legacy 3-token
+  # split (``cross`` / ``-`` / ``examination``) and is preserved verbatim
+  # for D-30 immutability of the v1 vocab section; the SEED_LEMMA pattern
+  # here covers the merged form.
+  - {id: "latin_cross_examination",      label: "PROCEDURE", pattern: [{LOWER: "cross-examination"}]}
+  - {id: "latin_cross_examinations",     label: "PROCEDURE", pattern: [{LOWER: "cross-examinations"}]}
+  - {id: "latin_cross_examiner",         label: "PROCEDURE", pattern: [{LOWER: "cross-examiner"}]}
+  - {id: "latin_cross_examine",          label: "PROCEDURE", pattern: [{LOWER: "cross-examine"}]}
+  - {id: "latin_cross_examined",         label: "PROCEDURE", pattern: [{LOWER: "cross-examined"}]}
+  - {id: "latin_cross_examining",        label: "PROCEDURE", pattern: [{LOWER: "cross-examining"}]}
+  - {id: "latin_recross_examination",    label: "PROCEDURE", pattern: [{LOWER: "recross-examination"}]}
+  - {id: "latin_post_trial",             label: "PROCEDURE", pattern: [{LOWER: "post-trial"}]}
+  - {id: "latin_pre_trial",              label: "PROCEDURE", pattern: [{LOWER: "pre-trial"}]}
+  - {id: "latin_post_hearing",           label: "PROCEDURE", pattern: [{LOWER: "post-hearing"}]}
+  - {id: "latin_good_faith",             label: "DOCTRINE",  pattern: [{LOWER: "good-faith"}]}
+  - {id: "latin_court_appointed",        label: "DOCTRINE",  pattern: [{LOWER: "court-appointed"}]}
+  - {id: "latin_follow_up",              label: "PROCEDURE", pattern: [{LOWER: "follow-up"}]}
+  - {id: "latin_follow_ups",             label: "PROCEDURE", pattern: [{LOWER: "follow-ups"}]}
+  - {id: "latin_multi_district",         label: "PROCEDURE", pattern: [{LOWER: "multi-district"}]}
+  - {id: "latin_multiple_situs",         label: "DOCTRINE",  pattern: [{LOWER: "multiple-situs"}]}
+  - {id: "latin_single_situs",           label: "DOCTRINE",  pattern: [{LOWER: "single-situs"}]}
+  - {id: "latin_common_sense",           label: "DOCTRINE",  pattern: [{LOWER: "common-sense"}]}
+  - {id: "latin_non_leading",            label: "PROCEDURE", pattern: [{LOWER: "non-leading"}]}
+  - {id: "latin_self_interest",          label: "DOCTRINE",  pattern: [{LOWER: "self-interest"}]}
+  - {id: "latin_self_incrimination",     label: "DOCTRINE",  pattern: [{LOWER: "self-incrimination"}]}
+  - {id: "latin_self_authenticating",    label: "DOCTRINE",  pattern: [{LOWER: "self-authenticating"}]}
+  - {id: "latin_self_serving",           label: "DOCTRINE",  pattern: [{LOWER: "self-serving"}]}
+  - {id: "latin_co_counsel",             label: "DOCTRINE",  pattern: [{LOWER: "co-counsel"}]}
+  - {id: "latin_re_introduction",        label: "PROCEDURE", pattern: [{LOWER: "re-introduction"}]}
+
+  # ===== SEED_VOCAB =====
+  # 42 entries from fixtures/legal_phrase_vocab.yaml (Phase 2 D-06).
+  # Advocacy-focused, corpus-validated. Multi-word entries get token-list
+  # patterns; single-word entries get one-token patterns. Label
+  # DOCTRINE/PROCEDURE/RULE per the vocab `category` field.
+  # The 4 latin entries (prima facie / in limine / ex parte / nolo contendere)
+  # already have SEED_LEMMA patterns above; vocab_ duplicate IDs would collide,
+  # so we omit them here and rely on the SEED_LEMMA slug substring match in
+  # test_every_phase2_vocab_term_has_a_doctrinal_pattern.
+  - {id: "vocab_hearsay",                     label: "DOCTRINE",  pattern: [{LOWER: "hearsay"}]}
+  - {id: "vocab_motion_in_limine",            label: "PROCEDURE", pattern: [{LOWER: "motion"}, {LOWER: "in"}, {LOWER: "limine"}]}
+  - {id: "vocab_impeachment",                 label: "DOCTRINE",  pattern: [{LOWER: "impeachment"}]}
+  - {id: "vocab_federal_rules_of_evidence",   label: "RULE",      pattern: [{LOWER: "federal"}, {LOWER: "rules"}, {LOWER: "of"}, {LOWER: "evidence"}]}
+  - {id: "vocab_fre",                         label: "RULE",      pattern: [{LOWER: "fre"}]}
+  - {id: "vocab_direct_examination",          label: "PROCEDURE", pattern: [{LOWER: "direct"}, {LOWER: "examination"}]}
+  - {id: "vocab_cross_examination",           label: "PROCEDURE", pattern: [{LOWER: "cross"}, {LOWER: "-"}, {LOWER: "examination"}]}
+  - {id: "vocab_opening_statement",           label: "PROCEDURE", pattern: [{LOWER: "opening"}, {LOWER: "statement"}]}
+  - {id: "vocab_closing_argument",            label: "PROCEDURE", pattern: [{LOWER: "closing"}, {LOWER: "argument"}]}
+  - {id: "vocab_objection",                   label: "PROCEDURE", pattern: [{LOWER: "objection"}]}
+  - {id: "vocab_sustained",                   label: "PROCEDURE", pattern: [{LOWER: "sustained"}]}
+  - {id: "vocab_overruled",                   label: "PROCEDURE", pattern: [{LOWER: "overruled"}]}
+  - {id: "vocab_leading_question",            label: "PROCEDURE", pattern: [{LOWER: "leading"}, {LOWER: "question"}]}
+  - {id: "vocab_expert_witness",              label: "DOCTRINE",  pattern: [{LOWER: "expert"}, {LOWER: "witness"}]}
+  - {id: "vocab_authentication",              label: "DOCTRINE",  pattern: [{LOWER: "authentication"}]}
+  - {id: "vocab_hearsay_exception",           label: "DOCTRINE",  pattern: [{LOWER: "hearsay"}, {LOWER: "exception"}]}
+  - {id: "vocab_fre_403",                     label: "FRE_RULE",  pattern: [{LOWER: "fre"}, {TEXT: "403"}]}
+  - {id: "vocab_fre_801",                     label: "FRE_RULE",  pattern: [{LOWER: "fre"}, {TEXT: "801"}]}
+  - {id: "vocab_best_evidence_rule",          label: "DOCTRINE",  pattern: [{LOWER: "best"}, {LOWER: "evidence"}, {LOWER: "rule"}]}
+  - {id: "vocab_excited_utterance",           label: "DOCTRINE",  pattern: [{LOWER: "excited"}, {LOWER: "utterance"}]}
+  - {id: "vocab_dying_declaration",           label: "DOCTRINE",  pattern: [{LOWER: "dying"}, {LOWER: "declaration"}]}
+  - {id: "vocab_objections",                  label: "PROCEDURE", pattern: [{LOWER: "objections"}]}
+  - {id: "vocab_exhibit",                     label: "PROCEDURE", pattern: [{LOWER: "exhibit"}]}
+  - {id: "vocab_foundation",                  label: "PROCEDURE", pattern: [{LOWER: "foundation"}]}
+  - {id: "vocab_verdict",                     label: "PROCEDURE", pattern: [{LOWER: "verdict"}]}
+  - {id: "vocab_appeal",                      label: "PROCEDURE", pattern: [{LOWER: "appeal"}]}
+  - {id: "vocab_rebuttal",                    label: "PROCEDURE", pattern: [{LOWER: "rebuttal"}]}
+  - {id: "vocab_discovery",                   label: "PROCEDURE", pattern: [{LOWER: "discovery"}]}
+  - {id: "vocab_deposition",                  label: "PROCEDURE", pattern: [{LOWER: "deposition"}]}
+  - {id: "vocab_redirect",                    label: "PROCEDURE", pattern: [{LOWER: "redirect"}]}
+  - {id: "vocab_peremptory",                  label: "PROCEDURE", pattern: [{LOWER: "peremptory"}]}
+  - {id: "vocab_prejudicial",                 label: "DOCTRINE",  pattern: [{LOWER: "prejudicial"}]}
+  - {id: "vocab_probative",                   label: "DOCTRINE",  pattern: [{LOWER: "probative"}]}
+  - {id: "vocab_privilege",                   label: "DOCTRINE",  pattern: [{LOWER: "privilege"}]}
+  - {id: "vocab_authenticity",                label: "DOCTRINE",  pattern: [{LOWER: "authenticity"}]}
+  - {id: "vocab_mistrial",                    label: "DOCTRINE",  pattern: [{LOWER: "mistrial"}]}
+  - {id: "vocab_reputation",                  label: "DOCTRINE",  pattern: [{LOWER: "reputation"}]}
+
+  # ===== INLINE_RULE =====
+  # Empirical token splits verified 2026-04-26 against spaCy 3.8.14
+  # tokenizer (RESEARCH §"Recommended regex pattern set" lines 421-461):
+  #   "FRE 403"           → ['FRE', '403']                  — 2 tokens
+  #   "FRCP 26(b)(1)"     → ['FRCP', '26(b)(1', ')']         — 3 tokens (subsection irrecoverable)
+  #   "FRCP 26"           → ['FRCP', '26']                  — 2 tokens
+  #   "FRAP 4"            → ['FRAP', '4']                   — 2 tokens
+  #   "Fed. R. Evid. 803" → ['Fed', '.', 'R.', 'Evid', '.', '803']  — 6 tokens
+  #   "Fed. R. Civ. P. 26"→ ['Fed', '.', 'R.', 'Civ', '.', 'P.', '26']  — 7 tokens
+  #   "42 U.S.C. § 1983"  → ['42', 'U.S.C.', '§', '1983']    — 4 tokens
+  #
+  # Note: vocab_fre / vocab_fre_403 / vocab_fre_801 above are SEED_VOCAB
+  # entries that happen to be rule-shaped; the patterns below are the
+  # GENERIC INLINE_RULE matchers covering arbitrary rule numbers.
+  - id: "fre_rule"
+    label: "FRE_RULE"
+    pattern:
+      - {TEXT: "FRE"}
+      - {TEXT: {REGEX: "^\\d+$"}}
+  - id: "frcp_rule"
+    label: "FRCP_RULE"
+    pattern:
+      - {TEXT: "FRCP"}
+      - {TEXT: {REGEX: "^\\d+(\\([\\w]+)?$"}}
+  - id: "frap_rule"
+    label: "FRAP_RULE"
+    pattern:
+      - {TEXT: "FRAP"}
+      - {TEXT: {REGEX: "^\\d+$"}}
+  - id: "fed_r_evid_rule"
+    label: "FED_R_RULE"
+    pattern:
+      - {TEXT: "Fed"}
+      - {TEXT: "."}
+      - {TEXT: "R."}
+      - {TEXT: "Evid"}
+      - {TEXT: "."}
+      - {TEXT: {REGEX: "^\\d+$"}}
+  - id: "fed_r_civ_p_rule"
+    label: "FED_R_RULE"
+    pattern:
+      - {TEXT: "Fed"}
+      - {TEXT: "."}
+      - {TEXT: "R."}
+      - {TEXT: "Civ"}
+      - {TEXT: "."}
+      - {TEXT: {REGEX: "^P\\.?$"}}
+      - {TEXT: {REGEX: "^\\d+$"}}
+  - id: "fed_r_app_p_rule"
+    label: "FED_R_RULE"
+    pattern:
+      - {TEXT: "Fed"}
+      - {TEXT: "."}
+      - {TEXT: "R."}
+      - {TEXT: "App"}
+      - {TEXT: "."}
+      - {TEXT: {REGEX: "^P\\.?$"}}
+      - {TEXT: {REGEX: "^\\d+$"}}
+  - id: "fed_r_crim_p_rule"
+    label: "FED_R_RULE"
+    pattern:
+      - {TEXT: "Fed"}
+      - {TEXT: "."}
+      - {TEXT: "R."}
+      - {TEXT: "Crim"}
+      - {TEXT: "."}
+      - {TEXT: {REGEX: "^P\\.?$"}}
+      - {TEXT: {REGEX: "^\\d+$"}}
+  - id: "usc_ref"
+    label: "USC_REF"
+    pattern:
+      - {TEXT: {REGEX: "^\\d+$"}}
+      - {TEXT: "U.S.C."}
+      - {TEXT: "§"}
+      - {TEXT: {REGEX: "^\\d+$"}}
+
+  # ===== BOOK_NP =====
+  # 30+ hand-curated doctrinal terms surfaced from
+  # scripts/inspect_top_noun_phrases.py output (top-50 per chapter, 2026-04-26).
+  # These are GENUINE doctrinal noun phrases that were neither in
+  # legal_lemma_overrides.yaml nor in legal_phrase_vocab.yaml. Every one is
+  # corpus-attested in the source book (frequency ≥ 2 in at least one chapter).
+  - {id: "book_decision_maker",          label: "DOCTRINE",  pattern: [{LOWER: "decision"}, {LOWER: "maker"}]}
+  - {id: "book_fact_finder",             label: "DOCTRINE",  pattern: [{LOWER: "fact"}, {LOWER: "finder"}]}
+  - {id: "book_burden_of_proof",         label: "DOCTRINE",  pattern: [{LOWER: "burden"}, {LOWER: "of"}, {LOWER: "proof"}]}
+  - {id: "book_jury_selection",          label: "PROCEDURE", pattern: [{LOWER: "jury"}, {LOWER: "selection"}]}
+  - {id: "book_jury_instruction",        label: "PROCEDURE", pattern: [{LOWER: "jury"}, {LOWER: "instruction"}]}
+  - {id: "book_jury_instructions",       label: "PROCEDURE", pattern: [{LOWER: "jury"}, {LOWER: "instructions"}]}
+  - {id: "book_prospective_juror",       label: "DOCTRINE",  pattern: [{LOWER: "prospective"}, {LOWER: "juror"}]}
+  - {id: "book_peremptory_challenge",    label: "PROCEDURE", pattern: [{LOWER: "peremptory"}, {LOWER: "challenge"}]}
+  - {id: "book_challenge_for_cause",     label: "PROCEDURE", pattern: [{LOWER: "challenge"}, {LOWER: "for"}, {LOWER: "cause"}]}
+  - {id: "book_trial_counsel",           label: "DOCTRINE",  pattern: [{LOWER: "trial"}, {LOWER: "counsel"}]}
+  - {id: "book_lay_witness",             label: "DOCTRINE",  pattern: [{LOWER: "lay"}, {LOWER: "witness"}]}
+  - {id: "book_expert_testimony",        label: "DOCTRINE",  pattern: [{LOWER: "expert"}, {LOWER: "testimony"}]}
+  - {id: "book_expert_opinion",          label: "DOCTRINE",  pattern: [{LOWER: "expert"}, {LOWER: "opinion"}]}
+  - {id: "book_lay_opinion",             label: "DOCTRINE",  pattern: [{LOWER: "lay"}, {LOWER: "opinion"}]}
+  - {id: "book_character_evidence",      label: "DOCTRINE",  pattern: [{LOWER: "character"}, {LOWER: "evidence"}]}
+  - {id: "book_demonstrative_evidence",  label: "DOCTRINE",  pattern: [{LOWER: "demonstrative"}, {LOWER: "evidence"}]}
+  - {id: "book_documentary_evidence",    label: "DOCTRINE",  pattern: [{LOWER: "documentary"}, {LOWER: "evidence"}]}
+  - {id: "book_business_records",        label: "DOCTRINE",  pattern: [{LOWER: "business"}, {LOWER: "records"}]}
+  - {id: "book_present_sense_impression", label: "DOCTRINE", pattern: [{LOWER: "present"}, {LOWER: "sense"}, {LOWER: "impression"}]}
+  - {id: "book_prior_inconsistent_statement", label: "DOCTRINE", pattern: [{LOWER: "prior"}, {LOWER: "inconsistent"}, {LOWER: "statement"}]}
+  - {id: "book_prior_consistent_statement",   label: "DOCTRINE", pattern: [{LOWER: "prior"}, {LOWER: "consistent"}, {LOWER: "statement"}]}
+  - {id: "book_credibility",             label: "DOCTRINE",  pattern: [{LOWER: "credibility"}]}
+  - {id: "book_testimony",               label: "DOCTRINE",  pattern: [{LOWER: "testimony"}]}
+  - {id: "book_summation",               label: "PROCEDURE", pattern: [{LOWER: "summation"}]}
+  - {id: "book_arbitration",             label: "PROCEDURE", pattern: [{LOWER: "arbitration"}]}
+  - {id: "book_arbitrator",              label: "DOCTRINE",  pattern: [{LOWER: "arbitrator"}]}
+  - {id: "book_plaintiff",               label: "DOCTRINE",  pattern: [{LOWER: "plaintiff"}]}
+  - {id: "book_defendant",               label: "DOCTRINE",  pattern: [{LOWER: "defendant"}]}
+  - {id: "book_judgment",                label: "DOCTRINE",  pattern: [{LOWER: "judgment"}]}
+  - {id: "book_motion",                  label: "PROCEDURE", pattern: [{LOWER: "motion"}]}
+  - {id: "book_pleading",                label: "PROCEDURE", pattern: [{LOWER: "pleading"}]}
+  - {id: "book_subpoena",                label: "PROCEDURE", pattern: [{LOWER: "subpoena"}]}
+  - {id: "book_indictment",              label: "PROCEDURE", pattern: [{LOWER: "indictment"}]}
+  - {id: "book_admissibility",           label: "DOCTRINE",  pattern: [{LOWER: "admissibility"}]}
+  - {id: "book_relevance",               label: "DOCTRINE",  pattern: [{LOWER: "relevance"}]}
+  - {id: "book_relevant",                label: "DOCTRINE",  pattern: [{LOWER: "relevant"}]}
+  - {id: "book_inadmissible",            label: "DOCTRINE",  pattern: [{LOWER: "inadmissible"}]}
+  - {id: "book_admissible",              label: "DOCTRINE",  pattern: [{LOWER: "admissible"}]}
+  - {id: "book_stipulation",             label: "PROCEDURE", pattern: [{LOWER: "stipulation"}]}
+  - {id: "book_deliberation",            label: "PROCEDURE", pattern: [{LOWER: "deliberation"}]}
+  - {id: "book_deliberations",           label: "PROCEDURE", pattern: [{LOWER: "deliberations"}]}
+  - {id: "book_cross_examiner",          label: "DOCTRINE",  pattern: [{LOWER: "cross"}, {LOWER: "-"}, {LOWER: "examiner"}]}
+  - {id: "book_panel",                   label: "PROCEDURE", pattern: [{LOWER: "panel"}]}
+  - {id: "book_juror",                   label: "DOCTRINE",  pattern: [{LOWER: "juror"}]}
+  - {id: "book_advocate",                label: "DOCTRINE",  pattern: [{LOWER: "advocate"}]}
