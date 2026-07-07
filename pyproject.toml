@@ -58,10 +58,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/OWNER/book-indexer"
-Repository = "https://github.com/OWNER/book-indexer"
-Issues = "https://github.com/OWNER/book-indexer/issues"
-Changelog = "https://github.com/OWNER/book-indexer/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/damienriehl/book-indexer"
+Repository = "https://github.com/damienriehl/book-indexer"
+Issues = "https://github.com/damienriehl/book-indexer/issues"
+Changelog = "https://github.com/damienriehl/book-indexer/blob/main/CHANGELOG.md"
 
 [project.scripts]
 book-index = "book_indexer.cli.__main__:app"

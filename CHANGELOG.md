@@ -40,5 +40,5 @@ open-source package.
 - Released under **AGPL-3.0-only**, inherited from the AGPL-3.0-licensed PyMuPDF
   PDF backend (see `NOTICE`).
 
-[Unreleased]: https://github.com/OWNER/book-indexer/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/OWNER/book-indexer/releases/tag/v0.1.0
+[Unreleased]: https://github.com/damienriehl/book-indexer/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/damienriehl/book-indexer/releases/tag/v0.1.0
