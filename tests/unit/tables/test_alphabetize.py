@@ -12,7 +12,6 @@ import pytest
 
 from book_indexer.tables.alphabetize import STRIP_SET, sort_key
 
-
 # ---------------------------------------------------------------------------
 # 11 fixed D-01 cases (RESEARCH §H-4)
 # ---------------------------------------------------------------------------

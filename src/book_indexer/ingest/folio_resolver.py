@@ -14,8 +14,8 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
 
 import pymupdf
 
@@ -175,8 +175,7 @@ def _int_to_roman(n: int) -> str:
 
 def _iter_spans(block: dict):
     for line in block.get("lines", []):
-        for span in line.get("spans", []):
-            yield span
+        yield from line.get("spans", [])
 
 
 def _span_text(span: dict) -> str:
@@ -346,7 +345,9 @@ def tier2_scan(
     # Note: allow sequences of length 1 if the position has no conflicting
     # evidence from the opposite parity (handles short PDFs).
     resolved: dict[int, tuple[str, str, str, str]] = {}
-    hits_by_pos_parity_style: dict[tuple[str, str, str], list[tuple[int, str, str, int, str]]] = defaultdict(list)
+    hits_by_pos_parity_style: dict[
+        tuple[str, str, str], list[tuple[int, str, str, int, str]]
+    ] = defaultdict(list)
     for pdf_page, by_pos in per_page.items():
         for position_code, (folio_str, folio_style, intval, raw) in by_pos.items():
             parity = "verso" if pdf_page % 2 == 0 else "recto"
@@ -426,7 +427,7 @@ def _int_to_folio(n: int, style: str) -> str:
     raise ValueError(f"cannot emit style={style!r} from contiguity inference")
 
 
-def check_monotonicity(resolved: dict[int, "FolioInfo"]) -> None:
+def check_monotonicity(resolved: dict[int, FolioInfo]) -> None:
     """Raise FolioMonotonicityError on regression within a style section.
 
     Null-folio pages (blank / unnumbered) are skipped.
@@ -525,6 +526,9 @@ class CascadeFolioResolver:
         for i in range(len(known) - 1):
             pa, fa, sa = known[i]
             pb, fb, sb = known[i + 1]
+            # `known` is filtered on folios[p][1] is not None, so the style
+            # component is always present here; narrow it for the type checker.
+            assert sa is not None
             gap_pages = pb - pa
             if gap_pages <= 1:
                 continue  # no interior pages to fill
@@ -564,7 +568,7 @@ class CascadeFolioResolver:
                 ]
                 if len(blank_in_gap) == 1:
                     skip_page = blank_in_gap[0]
-                    for offset, q in enumerate(range(pa + 1, pb), start=1):
+                    for q in range(pa + 1, pb):
                         if q in tier_used:
                             continue
                         if q == skip_page:

@@ -74,7 +74,7 @@ def _dedupe_locators(siblings: list[IndexEntry]) -> tuple[Locator, ...]:
             if key not in seen:
                 seen[key] = loc
 
-    def sort_key(loc: Locator) -> tuple[str, int, str]:
+    def sort_key(loc: Locator) -> tuple[str | int, ...]:
         try:
             return (loc.section_ref, 0, "") + (int(loc.folio),)  # numeric sort
         except (TypeError, ValueError):
@@ -128,6 +128,9 @@ def synthesize_bare_lemma_entries(
     # and skip union-of-token-lemmas decomposition.
     phrase_overrides = nlp.meta.get("_legal_phrase_overrides") or {} if nlp is not None else {}
 
+    # ``entries`` is non-empty here (early return above), so the loop always
+    # calls ``nlp`` — the caller contract guarantees a loaded Language.
+    assert nlp is not None
     for e in entries:
         canonical_lc = e.canonical.lower().strip()
         if phrase_overrides and canonical_lc in phrase_overrides:

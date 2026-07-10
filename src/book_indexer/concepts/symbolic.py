@@ -42,7 +42,7 @@ from spacy.language import Language
 from spacy.tokens import Doc, Span
 
 from .chunker import open_read_only_corpus  # noqa: F401  (re-export-friendly)
-from .schema import ConceptCandidate, ConceptDiscoveryResponse
+from .schema import ConceptCandidate, ConceptDiscoveryResponse, ConceptKind
 from .union import canonical_form_key
 
 __all__ = [
@@ -291,7 +291,7 @@ def _has_locator_prefix(text: str) -> bool:
     return bool(text and _LOCATOR_PREFIX.match(text))
 
 
-def kind_for_match(pass_type: str, label: str | None) -> str:
+def kind_for_match(pass_type: str, label: str | None) -> ConceptKind:
     """Deterministic mapping per RESEARCH §"kind mapping per pass" lines 734-760.
 
     Returns one of the D-03 ``kind`` enum values:
@@ -300,7 +300,7 @@ def kind_for_match(pass_type: str, label: str | None) -> str:
     if pass_type == "noun_phrase":
         return "concept"
     if pass_type == "doctrinal":
-        return {
+        doctrinal_map: dict[str, ConceptKind] = {
             "LATIN": "doctrine",
             "DOCTRINE": "doctrine",
             "PROCEDURE": "procedure",
@@ -310,16 +310,18 @@ def kind_for_match(pass_type: str, label: str | None) -> str:
             "USC_REF": "rule",
             "FED_R_RULE": "rule",
             "RULE": "rule",
-        }.get(label or "", "doctrine")
+        }
+        return doctrinal_map.get(label or "", "doctrine")
     if pass_type == "ner":
-        return {
+        ner_map: dict[str, ConceptKind] = {
             "PERSON": "actor",
             "ORG": "actor",
             "LAW": "instrument",
             "GPE": "actor",
             "EVENT": "concept",
             "WORK_OF_ART": "instrument",
-        }.get(label or "", "concept")
+        }
+        return ner_map.get(label or "", "concept")
     raise ValueError(f"unknown pass_type: {pass_type}")
 
 

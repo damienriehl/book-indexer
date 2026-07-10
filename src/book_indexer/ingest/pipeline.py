@@ -250,7 +250,7 @@ def run_ingest(pdf_path: str | Path, out_dir: str | Path) -> Path:
                     pdf_page_count=doc.page_count,
                     pymupdf_version=pymupdf.__version__,
                     pymupdf_textflags=PYMUPDF_TEXTFLAGS_DICT,
-                    spacy_version=spacy.__version__,
+                    spacy_version=spacy.__version__,  # pyright: ignore[reportPrivateImportUsage]
                     spacy_model="en_core_web_lg",
                     spacy_model_sha256=spacy_model_sha256(),
                     y_bands=y_bands,

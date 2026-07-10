@@ -20,8 +20,9 @@ from __future__ import annotations
 
 import csv
 import sqlite3
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, Literal
+from typing import Literal
 
 import inflect
 import orjson
@@ -64,7 +65,7 @@ def count_occurrences(
         return (0, 0, 0)
     words = term.strip().split()
     head = words[-1].lower()
-    plural_head = (_INFLECT.plural(head) or head).lower()
+    plural_head = (_INFLECT.plural(head) or head).lower()  # pyright: ignore[reportArgumentType]
     cur = conn.cursor()
     literal_row = cur.execute(
         "SELECT COUNT(*) FROM tokens WHERE LOWER(text) = ?",

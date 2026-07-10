@@ -33,6 +33,10 @@ classifiers = [
 dependencies = [
   "pymupdf>=1.27",
   "spacy>=3.8,<3.9",
+  # spaCy's CLI (imported at `import spacy`) needs click; it used to arrive
+  # transitively via typer, but typer>=0.16 dropped its click dependency, so
+  # it must now be declared explicitly or `import spacy` fails at runtime.
+  "click>=8.1",
   "orjson>=3.10",
   "pyyaml>=6.0",
   "matplotlib>=3.8",
@@ -113,6 +117,20 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B"]
+
+[tool.ruff.lint.flake8-bugbear]
+# Typer/FastAPI dependency-injection defaults are the framework's documented
+# calling convention — not the mutable-default anti-pattern B008 targets.
+extend-immutable-calls = ["typer.Argument", "typer.Option"]
+
+[tool.ruff.lint.per-file-ignores]
+# Embedded LLM prompt content — wrapping would alter the prompt sent to the model.
+"src/book_indexer/curator/personas.py" = ["E501"]
+# Module docstring holds a fixed-width typography table; wrapping breaks it.
+"src/book_indexer/ingest/section_detector.py" = ["E501"]
+# Test data, expected-output fixtures, and tokenizer inputs are kept verbatim
+# on one line for exact-match assertions.
+"tests/**" = ["E501"]
 
 [tool.pyright]
 include = ["src"]

@@ -20,7 +20,6 @@ from book_indexer.assembly.prose_normalize import (
     prose_to_canonical,
 )
 
-
 # ---------------------------------------------------------------------------
 # B-01: prose_to_canonical — positive cases (4 RESEARCH §B-01 recovered rows
 # that DID round-trip + plural/subsection variations).

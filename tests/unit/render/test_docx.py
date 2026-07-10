@@ -29,24 +29,17 @@ from pathlib import Path
 import pytest
 
 from book_indexer.render import (
-    IndexEntry,
     IndexTree,
-    Locator,
     SubEntry,
     SyntheticEntry,
 )
 from book_indexer.render.errors import FreezeError
 from book_indexer.tables.ir import (
-    CaseEntry,
-    RuleEntry,
-    StatuteEntry,
-    SubsectionEntry,
     TableOfCases,
     TableOfRules,
     TableOfStatutes,
     TableProvenance,
 )
-
 
 # --------------------------------------------------------------------------
 # Helpers

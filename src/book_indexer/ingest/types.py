@@ -23,7 +23,8 @@ class PageExtraction:
 class YBands:
     """Auto-detected y-band cutoffs (D-06)."""
     top_cutoff: float          # y < top_cutoff => strip band (running head)
-    bot_cutoff: float          # y > bot_cutoff => strip band (running foot); equals page height if no bottom band
+    # y > bot_cutoff => strip band (running foot); equals page height if no bottom band
+    bot_cutoff: float
     body_top: float            # body region top
     body_bot: float            # body region bottom
     detection_mode: str        # "cluster" | "fallback"
@@ -49,7 +50,8 @@ class BlockClassification:
     pdf_page: int
     block_index: int
     block_type: str            # "body" | "footnote" | "header_footer" | "image"
-    block_role: str | None     # "running_head" | "running_foot" | "chapter_title" | "footnote" | None
+    # "running_head" | "running_foot" | "chapter_title" | "footnote" | None
+    block_role: str | None
     avg_font_size: float | None
     y_center: float | None
     bbox: tuple[float, float, float, float]

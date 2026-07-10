@@ -14,13 +14,14 @@ requirements_addressed: UAT 08-1.
 """
 from __future__ import annotations
 
+from dataclasses import FrozenInstanceError
+
 import pytest
 
 from book_indexer.assembly.ir import IndexEntry
 from book_indexer.render.cross_refs import (
-    CrossRefEntry,
-    MIN_HEAD_LENGTH,
     STOP_HEADS,
+    CrossRefEntry,
     derive_cross_refs,
 )
 from book_indexer.render.ir import SyntheticEntry
@@ -207,5 +208,5 @@ def test_skip_plural_when_already_a_canonical() -> None:
 
 def test_cross_ref_entry_is_frozen() -> None:
     x = CrossRefEntry(head="interrogatories", primary_canonical="special interrogatory", sort_key="interrogatories")
-    with pytest.raises(Exception):
+    with pytest.raises(FrozenInstanceError):
         x.head = "mutated"  # type: ignore[misc]

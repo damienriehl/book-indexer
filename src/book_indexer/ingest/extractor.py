@@ -10,6 +10,8 @@ vs -BoldIt vs plain).
 """
 from __future__ import annotations
 
+from typing import Any, cast
+
 import pymupdf
 
 from .types import PageExtraction
@@ -19,7 +21,7 @@ def extract_page(doc: pymupdf.Document, pdf_page: int) -> PageExtraction:
     """Single-page extraction. Caller holds the Document open."""
     page = doc[pdf_page]
     # Default flags only; never re-sort at extraction time — we build our own order.
-    d = page.get_text("dict")
+    d = cast("dict[str, Any]", page.get_text("dict"))
     return PageExtraction(
         pdf_page=pdf_page,
         width=float(d["width"]),

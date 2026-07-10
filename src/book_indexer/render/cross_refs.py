@@ -55,8 +55,8 @@ requirements_addressed: UAT 08-1 (head-noun alphabetical cross-refs).
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 import inflect
 
@@ -153,8 +153,8 @@ def _plural_of(head: str) -> str | None:
     plural form is emitted (``head`` itself IS the plural, which the
     caller will already have picked up as the anchor).
     """
-    if _INFLECT.singular_noun(head) is False:
-        plural = _INFLECT.plural(head)
+    if _INFLECT.singular_noun(head) is False:  # pyright: ignore[reportArgumentType]  # inflect stub
+        plural = _INFLECT.plural(head)  # pyright: ignore[reportArgumentType]  # inflect stub
         if plural and plural.lower() != head.lower():
             return plural
     return None

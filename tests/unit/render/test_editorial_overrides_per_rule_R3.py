@@ -20,7 +20,6 @@ from book_indexer.render.editorial_overrides import (
 )
 from book_indexer.render.ir import IndexEntry
 
-
 _SIGNED_META = {
     "schema_version": 1,
     "curated_by": "test@example.com",

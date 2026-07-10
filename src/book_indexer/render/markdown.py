@@ -58,6 +58,13 @@ from book_indexer.curator import (
     is_droppable_plural_variant,
 )
 from book_indexer.curator.fixture import EditorialOverrides
+from book_indexer.tables.ir import (
+    Locator,
+    StatuteEntry,
+    TableOfCases,
+    TableOfRules,
+    TableOfStatutes,
+)
 
 from .cross_refs import CrossRefEntry, derive_cross_refs
 from .editorial_overrides import (
@@ -74,16 +81,6 @@ from .plural_consolidation import (
     consolidate_plural_pairs,
 )
 from .range_collapse import collapse_locators
-from book_indexer.tables.ir import (
-    CaseEntry,
-    Locator,
-    RuleEntry,
-    StatuteEntry,
-    SubsectionEntry,
-    TableOfCases,
-    TableOfRules,
-    TableOfStatutes,
-)
 
 __all__ = ["render_markdown"]
 
@@ -112,12 +109,12 @@ def _dedup_statute_entries(entries: list[StatuteEntry]) -> list[StatuteEntry]:
     §H-4. Each merged StatuteEntry has its canonical_citation + display_name
     rewritten to the normalized form.
     """
-    seen: "OrderedDict[str, StatuteEntry]" = OrderedDict()
+    seen: OrderedDict[str, StatuteEntry] = OrderedDict()
     for entry in entries:
         key = _normalize_statute_canonical(entry.canonical_citation)
         if key in seen:
             existing = seen[key]
-            merged_locs: "OrderedDict[tuple[str, str], Locator]" = OrderedDict()
+            merged_locs: OrderedDict[tuple[str, str], Locator] = OrderedDict()
             for loc in existing.locators:
                 merged_locs[(loc.section_ref, loc.folio)] = loc
             for loc in entry.locators:
@@ -718,7 +715,7 @@ def render_markdown(
         # defense in depth (the Pydantic record-level validator already
         # rejected letter deltas at fixture-load time).
         if overrides.recapitalize_pairs:
-            pairs = [tuple(p) for p in overrides.recapitalize_pairs]
+            pairs = [(p[0], p[1]) for p in overrides.recapitalize_pairs]
             assert_letters_only(pairs)
             text = apply_recap_pairs(text, pairs)
 

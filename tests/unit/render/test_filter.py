@@ -9,7 +9,6 @@ from pathlib import Path
 
 import pytest
 
-
 # --- Module-level constants and exports -----------------------------------
 
 def test_module_exports_required_names():

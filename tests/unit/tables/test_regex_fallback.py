@@ -6,6 +6,7 @@ sign-off), constitutional regex (RESEARCH §H-10), and jurisdiction gating.
 from __future__ import annotations
 
 import re
+from dataclasses import FrozenInstanceError
 
 import pytest
 
@@ -17,8 +18,8 @@ from book_indexer.tables.regex_fallback import (
     FRE_PATTERN,
     MRPC_PATTERN,
     PROSE_RULE_PATTERN,
-    RawRuleHit,
     US_CONST_ART_PATTERN,
+    RawRuleHit,
     scan_constitution,
     scan_rules,
 )
@@ -281,6 +282,7 @@ def test_module_does_not_import_verify_or_eyecite() -> None:
     or ``book_indexer.tables.resolver`` (Plan 03's modules).
     """
     import ast
+
     import book_indexer.tables.regex_fallback as mod
 
     with open(mod.__file__, encoding="utf-8") as f:
@@ -310,5 +312,5 @@ def test_raw_rule_hit_is_frozen_dataclass() -> None:
         char_offset=0,
         chapter_inferred=False,
     )
-    with pytest.raises(Exception):
+    with pytest.raises(FrozenInstanceError):
         h.rule_number = 999  # type: ignore[misc]

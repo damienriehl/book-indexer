@@ -42,12 +42,9 @@ of all Wave 1-2 modules.
 from __future__ import annotations
 
 import importlib.metadata as md
-import json
 import re
 import sqlite3
-from collections import defaultdict
 from pathlib import Path
-from typing import Any, Iterable
 
 from book_indexer.concepts.schema import (
     ConceptCandidate,
@@ -68,12 +65,11 @@ from .dedup import (
     BucketCandidate,
     SurfaceProvenance,
     build_buckets,
-    load_acronym_overrides,
     normalize_for_lemma,
 )
 from .ir import IndexEntry, IndexTree, IndexTreeProvenance, SubEntry
 from .subdivide import subdivide_oversize
-from .verifier_sweep import EvidenceByCanonical, run_sweep
+from .verifier_sweep import run_sweep
 
 # ---------------------------------------------------------------------------
 # Slug + sort_key helpers (D-07 + RESEARCH §H-10).
@@ -366,7 +362,7 @@ def _rewrite_locators_to_rep_evidence(
         # iterate parallel.
         chapters_sorted = sorted(by_chapter.keys())
         rewritten: list[Locator] = []
-        for loc, chap in zip(locs, chapters_sorted):
+        for loc, chap in zip(locs, chapters_sorted, strict=False):
             rep = by_chapter[chap]
             rewritten.append(
                 Locator(
@@ -439,7 +435,7 @@ def _attach_evidence_ids(
         # join matches byte-for-byte (ASM-02).
         new_locs: list[Locator] = []
         chapters_sorted = sorted(by_chapter.keys())
-        for loc, chap in zip(locators, chapters_sorted):
+        for loc, chap in zip(locators, chapters_sorted, strict=False):
             eid = chap_to_eid[chap]
             new_locs.append(
                 Locator(
@@ -660,7 +656,7 @@ def build_index_tree(
                         sort_key=sub.sort_key,
                         locators=sorted(
                             new_locs,
-                            key=lambda l: (l.section_ref, l.folio),
+                            key=lambda loc: (loc.section_ref, loc.folio),
                         ),
                     )
                 )
@@ -688,7 +684,7 @@ def build_index_tree(
         bucket = buckets[key]
         canon = canonical_by_key[key]
         locs = sorted(
-            fixed_locators[key], key=lambda l: (l.section_ref, l.folio)
+            fixed_locators[key], key=lambda loc: (loc.section_ref, loc.folio)
         )
         # variants = surfaces ∪ variants − {canonical}, sorted (-len, alpha)
         variant_set = set(bucket.surfaces) | set(bucket.variants) - {canon}
@@ -712,7 +708,9 @@ def build_index_tree(
     variants_by_id: dict[str, list[str]] = {
         e.id: list(e.variants) for e in preliminary_entries
     }
-    see_inverted = build_see_edges(variants_by_id)
+    # Called for its variant-graph validation side effects; the returned
+    # inverted map is intentionally unused (see D-03 note below).
+    build_see_edges(variants_by_id)
     # build_see_edges returns {variant_slug: [canonical_id, ...]}; we want
     # per-canonical see lists (currently empty: see edges are FROM variant
     # slugs TO canonicals, used by Phase 5 rendering for See cross-refs).

@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from .errors import SectionMonotonicityError
 from .section_detector import SectionStart
@@ -64,7 +64,7 @@ class Section:
         parent_global_id: str | None,
         end_pdf_page: int,
         end_token_offset: int,
-    ) -> "Section":
+    ) -> Section:
         return cls(
             section_id=-1,
             section_ref=start.section_ref,

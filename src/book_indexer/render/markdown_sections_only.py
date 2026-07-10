@@ -35,6 +35,13 @@ from book_indexer.curator import (
     is_droppable_plural_variant,
 )
 from book_indexer.curator.fixture import EditorialOverrides
+from book_indexer.tables.ir import (
+    Locator,
+    StatuteEntry,
+    TableOfCases,
+    TableOfRules,
+    TableOfStatutes,
+)
 
 from .cross_refs import derive_cross_refs
 from .editorial_overrides import (
@@ -52,16 +59,6 @@ from .plural_consolidation import (
     consolidate_plural_pairs,
 )
 from .section_range_collapse import collapse_locators_sections_only
-from book_indexer.tables.ir import (
-    CaseEntry,
-    Locator,
-    RuleEntry,
-    StatuteEntry,
-    SubsectionEntry,
-    TableOfCases,
-    TableOfRules,
-    TableOfStatutes,
-)
 
 __all__ = ["render_markdown_sections_only"]
 
@@ -78,12 +75,12 @@ def _normalize_statute_canonical(raw: str) -> str:
 
 def _dedup_statute_entries(entries: list[StatuteEntry]) -> list[StatuteEntry]:
     """B-11 statute newline-duplicate collapse — mirrors markdown.py."""
-    seen: "OrderedDict[str, StatuteEntry]" = OrderedDict()
+    seen: OrderedDict[str, StatuteEntry] = OrderedDict()
     for entry in entries:
         key = _normalize_statute_canonical(entry.canonical_citation)
         if key in seen:
             existing = seen[key]
-            merged_locs: "OrderedDict[tuple[str, str], Locator]" = OrderedDict()
+            merged_locs: OrderedDict[tuple[str, str], Locator] = OrderedDict()
             for loc in existing.locators:
                 merged_locs[(loc.section_ref, loc.folio)] = loc
             for loc in entry.locators:
@@ -507,7 +504,7 @@ def render_markdown_sections_only(
     if overrides is not None:
         text, stripped_xrefs = auto_strip_xref(text, removal_set)
         if overrides.recapitalize_pairs:
-            pairs = [tuple(p) for p in overrides.recapitalize_pairs]
+            pairs = [(p[0], p[1]) for p in overrides.recapitalize_pairs]
             assert_letters_only(pairs)
             text = apply_recap_pairs(text, pairs)
 

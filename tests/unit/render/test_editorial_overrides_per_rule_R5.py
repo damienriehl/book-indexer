@@ -12,15 +12,11 @@ The 4 standard cases here exercise the side-channel contract.
 """
 from __future__ import annotations
 
-import pytest
-
 from book_indexer.curator.fixture import EditorialOverrides, R5DeleteXrefRule
 from book_indexer.render.editorial_overrides import (
-    EditorialOverrideMismatch,
     apply_editorial_overrides,
 )
 from book_indexer.render.ir import IndexEntry
-
 
 _SIGNED_META = {
     "schema_version": 1,

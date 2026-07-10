@@ -35,11 +35,11 @@ from __future__ import annotations
 
 import re
 import sqlite3
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
-from .ir import IndexEntry, IndexTree
+from .ir import IndexTree
 from .synthesize import SyntheticEntry
 
 __all__ = [
@@ -320,7 +320,7 @@ def _render_range_collapses_summary(total: int) -> str:
         "## 14. Page-Range Collapses (D-03)",
         "",
         "Contiguous-folio range collapses emitted by `range_collapse.py`.",
-        f"On the reference corpus this is vacuous (Phase 4 cite-rule already coalesces).",
+        "On the reference corpus this is vacuous (Phase 4 cite-rule already coalesces).",
         "",
         f"Total collapsed locators: **{total}**",
         "",
@@ -390,7 +390,10 @@ def _render_curator_pass_section(
 
     removed = sorted(getattr(overrides, "removal_set", frozenset()))
     recap_pairs = sorted(
-        getattr(overrides, "recapitalize_pairs", ()),
+        cast(
+            "tuple[tuple[str, str], ...]",
+            getattr(overrides, "recapitalize_pairs", ()),
+        ),
         key=lambda p: (p[0], p[1]),
     )
     keep_plural = sorted(
@@ -477,10 +480,12 @@ def _render_calibration_section_placeholder(
         "",
         f"- b05_drop_count: {b05_drop_count} (initial 14)",
         f"- b06_synthesize_count: {b06_synthesize_count} (initial 22)",
-        f"- range_collapse_total: {range_collapses_total} (initial 0; vacuous on the reference corpus)",
+        f"- range_collapse_total: {range_collapses_total} "
+        "(initial 0; vacuous on the reference corpus)",
         f"- entries_in_md: {entries_in_md}",
         f"- evidence_rows_in_audit: {evidence_rows_in_audit}",
-        "- cold_render_wall_clock_s: n/a (non-deterministic; see stdout telemetry; initial budget 5.0s)",
+        "- cold_render_wall_clock_s: n/a "
+        "(non-deterministic; see stdout telemetry; initial budget 5.0s)",
         "",
     ]
     return "\n".join(lines)

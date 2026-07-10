@@ -15,6 +15,8 @@ Covers RESEARCH §H-2 algorithm:
 """
 from __future__ import annotations
 
+from dataclasses import FrozenInstanceError
+
 import pytest
 
 from book_indexer.assembly.dedup import (
@@ -29,7 +31,6 @@ from book_indexer.assembly.dedup import (
 )
 from book_indexer.assembly.errors import EmptyConceptsError
 from book_indexer.concepts.schema import ConceptCandidate
-
 
 # ---------------------------------------------------------------------------
 # spaCy fixture (module-scope to amortize cold-load cost ~800ms).
@@ -400,5 +401,5 @@ def test_bucket_candidate_default_fields() -> None:
 def test_surface_provenance_is_frozen() -> None:
     """SurfaceProvenance is dataclass(frozen=True) — mutation should raise."""
     prov = SurfaceProvenance(section_ref="§2.04", pdf_page=78, token_index=12)
-    with pytest.raises(Exception):  # FrozenInstanceError under dataclasses
+    with pytest.raises(FrozenInstanceError):
         prov.pdf_page = 99  # type: ignore[misc]

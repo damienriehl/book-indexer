@@ -8,15 +8,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from book_indexer.assembly.coverage import (
     ASM07_MAX,
     ASM07_MIN,
     compute_oob_status,
     emit_draft_report,
 )
-
 
 # ---------------------------------------------------------------------------
 # compute_oob_status — boundary tests.

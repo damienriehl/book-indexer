@@ -29,23 +29,24 @@ import os
 import tempfile
 from pathlib import Path
 
-from docx import Document
+from docx import Document as _new_docx_document
+from docx.document import Document
 
 from book_indexer.curator import (
     CuratorOverrides,
-    apply_recap_pairs,
     assert_letters_only,
     is_droppable_plural_variant,
 )
 from book_indexer.curator.fixture import EditorialOverrides
+from book_indexer.tables.ir import (
+    Locator,
+    TableOfCases,
+    TableOfRules,
+    TableOfStatutes,
+)
 
 from .cross_refs import derive_cross_refs
 from .docx import (
-    FROZEN_DT,
-    FROZEN_TS,
-    XE_MARKERS,
-    _RE_CREATED,
-    _RE_MODIFIED,
     _recap,
     _render_cross_ref,
     freeze_docx,
@@ -57,7 +58,7 @@ from .editorial_overrides import (
     write_mismatch_report,
 )
 from .filter import is_cruft, is_removed
-from .ir import IndexEntry, IndexTree, SubEntry, SyntheticEntry
+from .ir import IndexEntry, IndexTree, SyntheticEntry
 from .markdown_sections_only import _dedup_statute_entries
 from .metadata import Metadata
 from .parent_dedup import dedupe_parent_aliased_standalones
@@ -66,12 +67,6 @@ from .plural_consolidation import (
     consolidate_plural_pairs,
 )
 from .section_range_collapse import collapse_locators_sections_only
-from book_indexer.tables.ir import (
-    Locator,
-    TableOfCases,
-    TableOfRules,
-    TableOfStatutes,
-)
 
 __all__ = [
     "render_docx_sections_only",
@@ -474,7 +469,7 @@ def render_docx_sections_only(
         removal_set = overrides.removal_set
         keep_plural_set = overrides.keep_plural_set
         if overrides.recapitalize_pairs:
-            pairs = [tuple(p) for p in overrides.recapitalize_pairs]
+            pairs = [(p[0], p[1]) for p in overrides.recapitalize_pairs]
             assert_letters_only(pairs)
 
     # Phase 9 — D-07 ALLOW_STALE_OVERRIDES env-flag (mirrors markdown.py).
@@ -482,7 +477,7 @@ def render_docx_sections_only(
         os.environ.get("ALLOW_STALE_OVERRIDES") == "1"
     )
 
-    d = Document()
+    d = _new_docx_document()
     register_index_styles(d)
     _render_metadata_into_doc(d, metadata_for_block)
 

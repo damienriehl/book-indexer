@@ -136,8 +136,8 @@ def _input_preflight(
     curated_by = (data.get("metadata") or {}).get("curated_by", "")
     if curated_by == "PENDING_AUTHOR":
         raise RuntimeError(
-            f"acronym_overrides.yaml has metadata.curated_by=='PENDING_AUTHOR' "
-            f"— author sign-off required before cold build (D-06)"
+            "acronym_overrides.yaml has metadata.curated_by=='PENDING_AUTHOR' "
+            "— author sign-off required before cold build (D-06)"
         )
 
 

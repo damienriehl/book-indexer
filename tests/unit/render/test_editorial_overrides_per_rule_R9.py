@@ -9,16 +9,12 @@ text-half function.
 """
 from __future__ import annotations
 
-import pytest
-
 from book_indexer.curator.fixture import EditorialOverrides, R9WhitespaceRule
 from book_indexer.render.editorial_overrides import (
-    EditorialOverrideMismatch,
     apply_editorial_overrides,
     apply_r9_whitespace,
 )
 from book_indexer.render.ir import IndexEntry
-
 
 _SIGNED_META = {
     "schema_version": 1,

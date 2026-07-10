@@ -23,7 +23,7 @@ requirements_addressed: ASM-03 (hybrid deepest-containing-section rule).
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Iterable
+from collections.abc import Iterable
 
 from book_indexer.tables.ir import Locator
 from book_indexer.verify.evidence import Evidence
@@ -55,7 +55,7 @@ def lowest_common_ancestor(paths: list[tuple[str, ...]]) -> str:
     if len(paths) == 1:
         return paths[0][-1]
     common: list[str] = []
-    for refs_at_depth in zip(*paths):
+    for refs_at_depth in zip(*paths, strict=False):
         if all(r == refs_at_depth[0] for r in refs_at_depth):
             common.append(refs_at_depth[0])
         else:

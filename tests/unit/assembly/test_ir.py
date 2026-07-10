@@ -31,7 +31,6 @@ from book_indexer.assembly import (
 from book_indexer.assembly import ir as assembly_ir
 from book_indexer.tables import ir as tables_ir
 
-
 # ---------------------------------------------------------------------------
 # Locator is the SAME class — single source of truth
 # ---------------------------------------------------------------------------

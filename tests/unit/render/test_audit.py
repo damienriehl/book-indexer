@@ -25,7 +25,6 @@ from book_indexer.render.audit import (
 )
 from book_indexer.render.errors import RenderError
 
-
 # -----------------------------------------------------------------------------
 # Synthetic SQLite fixture
 # -----------------------------------------------------------------------------

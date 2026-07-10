@@ -21,7 +21,6 @@ from book_indexer.assembly.canonical import (
 )
 from book_indexer.assembly.dedup import BucketCandidate, SurfaceProvenance
 
-
 # ---------------------------------------------------------------------------
 # strip_leading_article — pure-string helper, no spaCy.
 # ---------------------------------------------------------------------------

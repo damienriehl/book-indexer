@@ -17,12 +17,10 @@ requirements_addressed: CON-03, CON-04, CON-07
 """
 from __future__ import annotations
 
-import re
 from collections import namedtuple
 
 import orjson
 import pytest
-import spacy
 from spacy.language import Language
 from spacy.tokens import Doc
 
@@ -31,16 +29,15 @@ from book_indexer.concepts.schema import (
     ConceptDiscoveryResponse,
 )
 from book_indexer.concepts.symbolic import (
+    _LOCATOR_PREFIX,
     LEGAL_STOPS,
     NER_KEEP_LABELS,
-    _LOCATOR_PREFIX,
     _strip_determiners,
     build_doc_from_tokens,
     build_example_quote,
     extract_doctrinal,
     extract_ner,
     extract_noun_phrases,
-    fetch_chapter_tokens,
     kind_for_match,
 )
 from book_indexer.concepts.union import canonical_form_key
@@ -450,7 +447,7 @@ def test_symbolic_output_byte_identical_across_runs(
     )
     assert b1 == b2, (
         f"non-determinism: {len(b1)} bytes vs {len(b2)} bytes "
-        f"(diff at first byte: {next((i for i, (a, b) in enumerate(zip(b1, b2)) if a != b), -1)})"
+        f"(diff at first byte: {next((i for i, (a, b) in enumerate(zip(b1, b2, strict=False)) if a != b), -1)})"
     )
 
 

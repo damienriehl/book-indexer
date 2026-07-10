@@ -6,14 +6,13 @@ Phase 1's _DDL import (same pattern as tests/unit/test_corpus_writer.py).
 from __future__ import annotations
 
 import sqlite3
-from typing import Iterable
+from collections.abc import Iterable
 
 import pytest
 
 from book_indexer.ingest.corpus_writer import _DDL
-from book_indexer.verify.matcher import MatchHit, scan_matches
+from book_indexer.verify.matcher import scan_matches
 from book_indexer.verify.query_tokenizer import QueryToken
-
 
 # ----- synthetic corpus builder -----
 

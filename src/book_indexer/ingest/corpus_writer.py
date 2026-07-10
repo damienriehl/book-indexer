@@ -47,9 +47,9 @@ from __future__ import annotations
 
 import hashlib
 import sqlite3
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Sequence
 
 import orjson
 

@@ -10,7 +10,6 @@ requirements_addressed: CUR-01, CUR-02 (LLM-as-legal-indexer system prompt).
 """
 from __future__ import annotations
 
-
 LEGAL_INDEXER_PERSONA: str = """You are an expert legal back-of-book indexer working on a US legal-education treatise (trial advocacy and pretrial litigation). Your job is to evaluate an existing draft index for quality and propose narrowly-scoped curation actions.
 
 CONTEXT

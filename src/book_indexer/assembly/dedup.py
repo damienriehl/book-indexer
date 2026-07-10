@@ -38,19 +38,16 @@ citation deconfliction at intake).
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable, Literal
+from typing import Literal
 
 import inflect
 import yaml
 
-# Phase 8 / COV-03: shared inflect engine for variant-loss enrichment.
-# The engine is stateless w.r.t. callers; lazy module-level instantiation
-# is fine. Used by ``_enrich_bucket_with_inflections`` below.
-_INFLECT = inflect.engine()
-
 # IMPORTED (NOT redefined) — D-04 single source of truth per RESEARCH §H-5.
+from book_indexer.concepts.schema import ConceptCandidate
 from book_indexer.tables.regex_fallback import (
     AMENDMENT_PATTERN,
     FEDR_PATTERN,
@@ -62,10 +59,13 @@ from book_indexer.tables.regex_fallback import (
     US_CONST_ART_PATTERN,
 )
 
-from book_indexer.concepts.schema import ConceptCandidate
-
 from .errors import EmptyConceptsError
 from .prose_normalize import collapse_whitespace, prose_to_canonical
+
+# Phase 8 / COV-03: shared inflect engine for variant-loss enrichment.
+# The engine is stateless w.r.t. callers; lazy module-level instantiation
+# is fine. Used by ``_enrich_bucket_with_inflections`` below.
+_INFLECT = inflect.engine()
 
 # ---------------------------------------------------------------------------
 # Phase-4-owned drop patterns. NOT in regex_fallback — those are extract
@@ -199,6 +199,8 @@ def lemma_bucket_key(s: str, nlp) -> str:
                 right_key = lemma_bucket_key(right, nlp) if right else ""
                 parts = [p for p in (left_key, lemma_mid, right_key) if p]
                 return " ".join(parts)
+    # Caller contract (tree.py Wave 3) always passes a loaded Language.
+    assert nlp is not None
     doc = nlp(base)
     # Phase 8 / D-04 cascade (a): apply curated token-level lemma overrides
     # so spaCy verb-lemma collapses (e.g., 'dying' → 'die') don't corrupt
@@ -359,7 +361,7 @@ def load_acronym_overrides(
 
 
 def _enrich_bucket_with_inflections(
-    bucket: "BucketCandidate",
+    bucket: BucketCandidate,
     cand: ConceptCandidate,
     normalized_surface: str,
 ) -> None:
@@ -436,10 +438,10 @@ def _enrich_bucket_with_inflections(
         if not words:
             continue
         head = words[-1]
-        sing_test = _INFLECT.singular_noun(head)
+        sing_test = _INFLECT.singular_noun(head)  # pyright: ignore[reportArgumentType]
         if sing_test is False:
             # Head is singular — pluralize directly; sing_head == head.
-            plural_head = _INFLECT.plural(head)
+            plural_head = _INFLECT.plural(head)  # pyright: ignore[reportArgumentType]
             sing_head = head
         else:
             # Head is already plural — use as-is for the plural form;
@@ -591,7 +593,7 @@ def build_buckets(
         for sub in (cand.suggested_subentries or []):
             if sub not in bucket.suggested_subentries:
                 bucket.suggested_subentries.append(sub)
-        bucket.pass_types.add(cand.pass_type if hasattr(cand, "pass_type") else "noun_phrase")
+        bucket.pass_types.add(getattr(cand, "pass_type", "noun_phrase"))
         if cf in candidate_provenance:
             bucket.surface_provenance[normalized_surface] = candidate_provenance[cf]
 
@@ -629,8 +631,12 @@ def build_buckets(
     dropped_table_citations: list[dict] = []
     for key in list(buckets.keys()):
         bucket = buckets[key]
-        classes = [_classify_table_citation(s) for s in bucket.surfaces]
-        classes_v = [_classify_table_citation(v) for v in bucket.variants]
+        classes: list[Literal["rules", "statutes", "cases"] | None] = [
+            _classify_table_citation(s) for s in bucket.surfaces
+        ]
+        classes_v: list[Literal["rules", "statutes", "cases"] | None] = [
+            _classify_table_citation(v) for v in bucket.variants
+        ]
         all_match = bool(classes) and all(c is not None for c in classes)
 
         if all_match:
@@ -645,7 +651,9 @@ def build_buckets(
             buckets.pop(key)
             continue
 
-        non_none = [c for c in (classes + classes_v) if c is not None]
+        non_none: list[Literal["rules", "statutes", "cases"]] = [
+            c for c in (classes + classes_v) if c is not None
+        ]
         if non_none:
             bucket.derived_from_table = non_none[0]
         else:

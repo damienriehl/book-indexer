@@ -24,7 +24,6 @@ from pathlib import Path
 import pytest
 
 from book_indexer.render import (
-    IndexEntry,
     IndexTree,
     Locator,
     SubEntry,
@@ -40,7 +39,6 @@ from book_indexer.tables.ir import (
     TableOfStatutes,
     TableProvenance,
 )
-
 
 # --------------------------------------------------------------------------
 # Module-level imports & exports

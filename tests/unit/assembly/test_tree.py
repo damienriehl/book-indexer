@@ -17,15 +17,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from book_indexer.assembly import (
     compute_id,
     compute_oob_status,
     compute_sort_key,
     slugify,
 )
-
 
 # ---------------------------------------------------------------------------
 # slugify — D-07 + RESEARCH §H-10.

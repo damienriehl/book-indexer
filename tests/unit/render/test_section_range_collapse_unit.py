@@ -220,6 +220,7 @@ def test_9_metadata_extra_forbid_still_enforced():
     """Lock #2 — ``extra='forbid'`` still rejects unknown fields after the
     pages_only_variant addition."""
     from pydantic import ValidationError
+
     from book_indexer.render.metadata import Metadata
 
     with pytest.raises(ValidationError):

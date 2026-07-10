@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import statistics
 from collections import Counter
+from typing import Any, cast
 
 import pymupdf
 
@@ -64,7 +65,7 @@ def detect_y_bands(doc: pymupdf.Document) -> YBands:
     for pdf_page in range(doc.page_count):
         page = doc[pdf_page]
         page_heights.append(float(page.rect.height))
-        d = page.get_text("dict")
+        d = cast("dict[str, Any]", page.get_text("dict"))
         for b in d["blocks"]:
             if b["type"] != 0:
                 continue

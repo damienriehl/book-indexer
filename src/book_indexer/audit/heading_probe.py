@@ -20,7 +20,7 @@ emits ``ProbeCandidate`` rows for downstream verification.
 from __future__ import annotations
 
 import re
-from typing import Iterable
+from collections.abc import Iterable
 
 from pydantic import BaseModel, ConfigDict, Field
 

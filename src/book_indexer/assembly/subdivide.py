@@ -33,7 +33,7 @@ requirements_addressed: ASM-04 (>7-locator subdivide rule).
 """
 from __future__ import annotations
 
-from typing import Iterable
+from collections.abc import Iterable
 
 from book_indexer.tables.ir import Locator
 
@@ -116,7 +116,7 @@ def _build_sub_entries(
             continue
         # Sort locators by (section_ref, folio) for determinism
         sub_locators_sorted = sorted(
-            sub_locators, key=lambda l: (l.section_ref, l.folio)
+            sub_locators, key=lambda loc: (loc.section_ref, loc.folio)
         )
         sub_entries.append(
             SubEntry(
@@ -221,5 +221,5 @@ def subdivide_oversize(
         )
 
     # Sort residual deterministically by (section_ref, folio).
-    residual_sorted = sorted(residual, key=lambda l: (l.section_ref, l.folio))
+    residual_sorted = sorted(residual, key=lambda loc: (loc.section_ref, loc.folio))
     return sub_entries, residual_sorted

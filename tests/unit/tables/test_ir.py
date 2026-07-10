@@ -26,7 +26,6 @@ from book_indexer.tables.ir import (
     TableProvenance,
 )
 
-
 # ---------------------------------------------------------------------------
 # Builders — keep the round-trip tests readable
 # ---------------------------------------------------------------------------

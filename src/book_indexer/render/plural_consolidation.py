@@ -79,12 +79,12 @@ requirements_addressed: v1.2.1 plural consolidation (post-v1.2 patch).
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, Literal, Union
+from typing import Literal, cast
 
 import inflect
 
-from .cross_refs import CrossRefEntry
 from .ir import IndexEntry
 
 __all__ = [
@@ -227,10 +227,10 @@ def _is_plural_of(singular: str, plural: str) -> bool:
         return False
     if singular.lower() == plural.lower():
         return False
-    sing_check = _INFLECT.singular_noun(plural)
+    sing_check = _INFLECT.singular_noun(plural)  # pyright: ignore[reportArgumentType]
     if isinstance(sing_check, str) and sing_check.lower() == singular.lower():
         return True
-    plur_check = _INFLECT.plural(singular)
+    plur_check = _INFLECT.plural(singular)  # pyright: ignore[reportArgumentType]  # inflect stub
     if isinstance(plur_check, str) and plur_check.lower() == plural.lower():
         return True
     return False
@@ -256,7 +256,7 @@ def _locators_match(a: IndexEntry, b: IndexEntry) -> bool:
     """
     if len(a.locators) != len(b.locators):
         return False
-    for la, lb in zip(a.locators, b.locators):
+    for la, lb in zip(a.locators, b.locators, strict=True):
         if la.section_ref != lb.section_ref or la.folio != lb.folio:
             return False
     return True
@@ -477,8 +477,8 @@ def _try_consolidate_pair(
         )
 
     # kind_a == "entry"
-    entry_a = payload_a  # IndexEntry
-    entry_b = payload_b  # IndexEntry
+    entry_a = cast(IndexEntry, payload_a)
+    entry_b = cast(IndexEntry, payload_b)
     canon_a = _entry_canonical(entry_a)
     canon_b = _entry_canonical(entry_b)
     singular, _plural, ending = _orient_pair(canon_a, canon_b)

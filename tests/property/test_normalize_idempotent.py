@@ -5,7 +5,8 @@ and that none of the canonical-strip codepoints survive a single pass.
 """
 from __future__ import annotations
 
-from hypothesis import given, settings, strategies as st
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from book_indexer.ingest.normalizer import normalize
 

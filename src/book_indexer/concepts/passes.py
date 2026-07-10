@@ -136,7 +136,7 @@ def build_provenance(
     return {
         "pass_type": pass_type,
         "chunk_id": chunk_id,
-        "spacy_version": spacy.__version__,
+        "spacy_version": spacy.__version__,  # pyright: ignore[reportPrivateImportUsage]
         "spacy_model": nlp.meta.get("name", "en_core_web_lg"),
         "spacy_model_sha": compute_spacy_model_sha(nlp),
         "entity_ruler_pattern_sha": pattern_sha if pass_type == "doctrinal" else None,

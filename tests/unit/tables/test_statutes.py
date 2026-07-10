@@ -7,6 +7,7 @@ Constitution fallback (Amendment + article), and jurisdiction gating
 from __future__ import annotations
 
 import ast
+from dataclasses import FrozenInstanceError
 
 import pytest
 
@@ -176,5 +177,5 @@ def test_raw_statute_hit_is_frozen() -> None:
         pdf_page=1,
         char_offset=0,
     )
-    with pytest.raises(Exception):
+    with pytest.raises(FrozenInstanceError):
         h.section = "999"  # type: ignore[misc]

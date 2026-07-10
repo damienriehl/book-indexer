@@ -48,7 +48,7 @@ from __future__ import annotations
 
 import difflib
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 from book_indexer.curator.fixture import (
@@ -63,6 +63,7 @@ from book_indexer.curator.fixture import (
     R8PluralCanonicalRule,
     R9WhitespaceRule,
 )
+from book_indexer.tables.ir import Locator
 
 from .ir import IndexEntry
 
@@ -119,7 +120,8 @@ class Mismatch:
             cutoff 0.6) — the curator's triage hints.
         suggested_action: one of the three D-08 templates:
             ``"update fixture: rename {expected!r} → {closest[0]!r}"``,
-            ``"delete fixture entry: target removed upstream (no IR canonical within edit-distance 0.6 of {expected!r})"``,
+            ``"delete fixture entry: target removed upstream
+            (no IR canonical within edit-distance 0.6 of {expected!r})"``,
             or a custom string for ambiguous / structural cases (e.g.
             R3 ``"ambiguous: ..."``).
     """
@@ -329,7 +331,7 @@ def _apply_one_R7(
         # Merge locators. Locator instances are Pydantic; comparable via
         # (section_ref, folio) tuple as the dedup key (mirrors
         # parent_dedup._locator_set).
-        seen: dict[tuple[str, str], object] = {}
+        seen: dict[tuple[str, str], Locator] = {}
         for loc in list(target.locators) + list(artifact.locators):
             key = (loc.section_ref, loc.folio)
             seen.setdefault(key, loc)

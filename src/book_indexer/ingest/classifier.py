@@ -10,7 +10,8 @@ from __future__ import annotations
 
 import statistics
 from collections import Counter
-from typing import Sequence
+from collections.abc import Sequence
+from typing import cast
 
 from .types import BlockClassification, PageExtraction, YBands
 
@@ -85,7 +86,10 @@ def classify_blocks(
     bottom_quartile_threshold = body_top + 0.75 * (body_bot - body_top)
 
     for block_index, block in enumerate(page_dict["blocks"]):
-        bbox = tuple(round(float(v), 2) for v in block["bbox"])
+        bbox = cast(
+            "tuple[float, float, float, float]",
+            tuple(round(float(v), 2) for v in block["bbox"]),
+        )
         y0, y1 = bbox[1], bbox[3]
 
         if block["type"] != 0:

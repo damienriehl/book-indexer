@@ -25,7 +25,6 @@ from book_indexer.render.coverage import (
 )
 from book_indexer.render.synthesize import SyntheticEntry
 
-
 # -----------------------------------------------------------------------------
 # Fixtures — synthetic IR + draft + SQLite + ledger
 # -----------------------------------------------------------------------------
@@ -59,7 +58,7 @@ Phase 5 (Plan 04-05 cold-build acceptance gate) calibrates the
 size-band thresholds. Initial estimates from RESEARCH §H-12 are
 PRESERVED in the test file's calibration block until Phase 5
 edits them per the 15%-headroom policy.
-""".encode("utf-8")
+""".encode()
 
 
 @pytest.fixture
@@ -121,7 +120,6 @@ def synth_sections_payload():
 
 @pytest.fixture
 def synth_synthetics(make_locator):
-    from book_indexer.render.ir import Locator
 
     return [
         SyntheticEntry(

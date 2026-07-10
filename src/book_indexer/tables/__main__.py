@@ -58,7 +58,7 @@ import tempfile
 import time
 from collections import defaultdict
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import fitz  # PyMuPDF
 import orjson
@@ -70,6 +70,7 @@ from .ir import (
     CaseEntry,
     Locator,
     RuleEntry,
+    RuleSystem,
     StatuteEntry,
     SubsectionEntry,
     TableOfCases,
@@ -460,7 +461,7 @@ def _build_rules(
         try:
             entries.append(RuleEntry(
                 parent_rule=f"{rule_system} {rule_number}",
-                rule_system=rule_system,
+                rule_system=cast(RuleSystem, rule_system),
                 sort_key=sk,
                 parent_locators=parent_locs,
                 subsections=sub_entries,
@@ -516,7 +517,7 @@ def build(pdf_path: Path, out_dir: Path) -> dict:
 
         for chapter, start_page, end_page in chapter_rows:
             for page_1based in range(start_page, end_page + 1):
-                page_text = doc[page_1based - 1].get_text("text")
+                page_text = cast(str, doc[page_1based - 1].get_text("text"))
                 ch_cases = scan_cases(page_text, pdf_page=page_1based)
                 ch_stats = scan_statutes(
                     page_text,
@@ -541,7 +542,8 @@ def build(pdf_path: Path, out_dir: Path) -> dict:
 
             # Per-chapter Id./Supra. resolution
             chapter_text = "".join(
-                doc[i].get_text("text") for i in range(start_page - 1, end_page)
+                cast(str, doc[i].get_text("text"))
+                for i in range(start_page - 1, end_page)
             )
             _, unresolved = resolve_chapter(
                 chapter_text,

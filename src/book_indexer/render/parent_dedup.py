@@ -60,8 +60,9 @@ requirements_addressed: v1.2.2 parent-aliased-standalone dedup
 """
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from typing import Iterable, Literal
+from typing import Literal
 
 from .plural_consolidation import ConsolidatedEntry
 
@@ -249,7 +250,7 @@ def _standalone_variants(payload: object) -> tuple[str, ...]:
 
 def dedupe_parent_aliased_standalones(
     stream: Iterable[StreamItem],
-    entries_by_canonical: dict[str, object] | None = None,
+    entries_by_canonical: Mapping[str, object] | None = None,
 ) -> tuple[list[StreamItem], dict[str, tuple[str, ...]], list[ParentDedupResult]]:
     """Drop standalone entries that duplicate B-06 synthesized children.
 
@@ -332,7 +333,7 @@ def dedupe_parent_aliased_standalones(
             synth_items.append((i, payload))
     synth_items.sort(key=lambda pair: getattr(pair[1], "stem", ""))
 
-    for synth_idx, synth in synth_items:
+    for _synth_idx, synth in synth_items:
         stem = getattr(synth, "stem", "")
         siblings = getattr(synth, "sibling_canonicals", ()) or ()
         for child_canonical in sorted(siblings):

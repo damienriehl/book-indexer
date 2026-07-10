@@ -6,13 +6,8 @@ helper at build time. Plan 06-05 will bump 0.1.0 → 1.0.0 at the v1.0 release.
 """
 from __future__ import annotations
 
-import sys
+import tomllib
 from pathlib import Path
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:  # pragma: no cover — repo pins Python 3.12+
-    import tomli as tomllib  # type: ignore[no-redef]
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PYPROJECT_PATH = REPO_ROOT / "pyproject.toml"

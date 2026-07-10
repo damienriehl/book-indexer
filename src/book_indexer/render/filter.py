@@ -181,7 +181,6 @@ def auto_strip_xref(
 
     # 2. See / See also <target> clause surgery.
     def _scrub_see(match: re.Match[str]) -> str:
-        prefix = match.group(1)  # ``,?\s*``
         target = _normalize_xref_target(match.group(2))
         if target in removal_set:
             stripped.append(target)

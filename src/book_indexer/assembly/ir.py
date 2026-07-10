@@ -34,7 +34,6 @@ from pydantic import BaseModel, ConfigDict, Field
 # identical across the pipeline (Lock #5 / D-07).
 from book_indexer.tables.ir import Locator
 
-
 # Slug regex for IndexEntry.id: lowercase ASCII, optional hyphens, optional
 # numeric collision suffix (-2, -3, ...) per D-07 + RESEARCH §H-10.
 # Examples — accept: ``voir-dire``, ``voir-dire-2``, ``frcp-12``,

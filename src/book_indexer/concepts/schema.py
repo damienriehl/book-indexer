@@ -29,6 +29,9 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.functional_validators import AfterValidator
 
+# D-03 concept ``kind`` enum, shared with ``symbolic.kind_for_match``.
+ConceptKind = Literal["doctrine", "rule", "procedure", "concept", "actor", "instrument"]
+
 # ---------------------------------------------------------------------------
 # CON-07 / D-05: field-wide locator-prefix rejection
 # ---------------------------------------------------------------------------
@@ -88,9 +91,7 @@ class ConceptCandidate(BaseModel):
     canonical_form: Annotated[NoLocatorStr, Field(min_length=2)]
     variants: Annotated[list[NoLocatorStr], Field(default_factory=list, max_length=10)]
     example_quote: Annotated[NoLocatorStr, Field(max_length=200)]
-    kind: (
-        Literal["doctrine", "rule", "procedure", "concept", "actor", "instrument"] | None
-    ) = None
+    kind: ConceptKind | None = None
     suggested_subentries: list[NoLocatorStr] | None = None
 
 

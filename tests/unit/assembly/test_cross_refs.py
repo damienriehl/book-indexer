@@ -45,7 +45,6 @@ from book_indexer.assembly.cross_refs import (
 )
 from book_indexer.assembly.errors import CycleDetectedError, DanglingRefError
 
-
 # ---------------------------------------------------------------------------
 # _slugify
 # ---------------------------------------------------------------------------

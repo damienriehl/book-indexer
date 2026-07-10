@@ -156,4 +156,4 @@ def run_sweep(
     with ProcessPoolExecutor(max_workers=max_workers) as ex:
         results = list(ex.map(_sweep_one, args_list, chunksize=10))
 
-    return dict(zip(keys, results))
+    return dict(zip(keys, results, strict=True))

@@ -79,7 +79,7 @@ def scan_matches(
             # Exact (norm) — canonical-length window.
             if i + n <= page_len:
                 window = tokens[i : i + n]
-                if all(q.norm == w[1] for q, w in zip(query_tokens, window)):
+                if all(q.norm == w[1] for q, w in zip(query_tokens, window, strict=True)):
                     yield MatchHit(
                         pdf_page=pdf_page,
                         token_start=window[0][0],
@@ -93,7 +93,7 @@ def scan_matches(
                 # Lemma — canonical-length window, only if norm didn't already
                 # win (would have been "exact" above). Duplicate mode collapse:
                 # emit one Evidence per start position, strongest mode wins.
-                if all(q.lemma == w[2] for q, w in zip(query_tokens, window)):
+                if all(q.lemma == w[2] for q, w in zip(query_tokens, window, strict=True)):
                     yield MatchHit(
                         pdf_page=pdf_page,
                         token_start=window[0][0],
@@ -111,7 +111,7 @@ def scan_matches(
                 if m == 0 or i + m > page_len:
                     continue
                 av_window = tokens[i : i + m]
-                if all(q.norm == w[1] for q, w in zip(av, av_window)):
+                if all(q.norm == w[1] for q, w in zip(av, av_window, strict=True)):
                     yield MatchHit(
                         pdf_page=pdf_page,
                         token_start=av_window[0][0],

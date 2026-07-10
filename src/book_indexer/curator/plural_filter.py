@@ -108,7 +108,7 @@ def is_droppable_plural_variant(
         return c_lower not in keep_set
     # Direction A: variant is plural, canonical is singular form
     #   (inflect.singular_noun("hearts") == "heart")
-    singular_of_v = _ENGINE.singular_noun(v_lower)
+    singular_of_v = _ENGINE.singular_noun(v_lower)  # pyright: ignore[reportArgumentType]
     if singular_of_v and singular_of_v == c_lower:
         # If the plural form (i.e., the variant) is curator-protected, keep it.
         return v_lower not in keep_set
@@ -117,13 +117,13 @@ def is_droppable_plural_variant(
     # Covers irregular reverse cases where inflect.plural() of an
     # already-plural word does NOT round-trip (e.g., plural("criteria")
     # == "criterias", which fails Direction C below).
-    singular_of_c = _ENGINE.singular_noun(c_lower)
+    singular_of_c = _ENGINE.singular_noun(c_lower)  # pyright: ignore[reportArgumentType]
     if singular_of_c and singular_of_c == v_lower:
         # Also exclude if canonical (the plural) is in keep_set.
         return c_lower not in keep_set
     # Direction C: canonical is singular, variant is plural form
     #   (inflect.plural("heart") == "hearts")
-    plural_of_c = _ENGINE.plural(c_lower)
+    plural_of_c = _ENGINE.plural(c_lower)  # pyright: ignore[reportArgumentType]  # inflect stub
     if plural_of_c and plural_of_c == v_lower:
         # Also exclude if the plural-form (i.e., the variant) is in keep_set
         # — covers the case where keep_set lists the plural form

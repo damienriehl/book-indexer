@@ -35,7 +35,7 @@ from spacy.tokens import Doc
 from .normalizer import normalize
 from .types import BlockClassification
 
-spacy.require_cpu()
+spacy.require_cpu()  # pyright: ignore[reportPrivateImportUsage]
 
 # W108 is emitted by spaCy's rule-based lemmatizer when POS tags are missing
 # for some tokens — which happens for punctuation or out-of-vocab tokens even
@@ -392,8 +392,9 @@ def spacy_model_sha256() -> str:
     filename then bytes. A lemmatizer-version drift produces a new digest,
     which downstream QUAL-01 uses to detect cache-invalidating changes.
     """
-    import en_core_web_lg
+    import en_core_web_lg  # pyright: ignore[reportMissingImports]
 
+    assert en_core_web_lg.__file__ is not None
     model_dir = Path(en_core_web_lg.__file__).resolve().parent
     h = hashlib.sha256()
     for p in sorted(model_dir.rglob("*")):

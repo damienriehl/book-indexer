@@ -35,7 +35,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 def is_rejoin_valid(
     left_stem: str,
     right_continuation: str,
-    nlp: "spacy.language.Language",
+    nlp: spacy.language.Language,
     overrides: set[str],
 ) -> bool:
     """Return True iff concatenating ``left_stem`` + ``right_continuation``

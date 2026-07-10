@@ -21,18 +21,18 @@ requirements_addressed: v1.2.1 plural consolidation.
 from __future__ import annotations
 
 import pytest
-from hypothesis import given, settings, strategies as st
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from book_indexer.assembly.ir import IndexEntry
 from book_indexer.render.cross_refs import CrossRefEntry
 from book_indexer.render.plural_consolidation import (
-    ConsolidatedEntry,
     DEFAULT_KEEP_PLURAL_VARIANTS,
+    ConsolidatedEntry,
     consolidate_plural_pairs,
     infer_inflection_ending,
 )
 from book_indexer.tables.ir import Locator
-
 
 # ---------------------------------------------------------------------------
 # Builders

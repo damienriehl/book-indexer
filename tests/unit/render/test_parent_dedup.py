@@ -20,18 +20,17 @@ requirements_addressed: v1.2.2 parent dedup.
 """
 from __future__ import annotations
 
-from hypothesis import given, settings, strategies as st
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from book_indexer.assembly.ir import IndexEntry
 from book_indexer.render.cross_refs import CrossRefEntry
 from book_indexer.render.ir import SyntheticEntry
 from book_indexer.render.parent_dedup import (
-    ParentDedupResult,
     dedupe_parent_aliased_standalones,
 )
 from book_indexer.render.plural_consolidation import ConsolidatedEntry
 from book_indexer.tables.ir import Locator
-
 
 # ---------------------------------------------------------------------------
 # Builders

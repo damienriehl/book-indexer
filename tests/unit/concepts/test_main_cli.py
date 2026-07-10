@@ -24,7 +24,6 @@ import pytest
 
 from book_indexer.concepts.__main__ import (
     DEFAULT_CORPUS,
-    DEFAULT_OUTPUT_DIR,
     DEFAULT_PATTERNS,
     RunSummary,
     _emit_telemetry,

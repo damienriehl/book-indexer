@@ -38,10 +38,13 @@ import re
 import tempfile
 import zipfile
 from pathlib import Path
+from typing import cast
 
-from docx import Document
+from docx import Document as _new_docx_document
+from docx.document import Document
 from docx.enum.style import WD_STYLE_TYPE
 from docx.shared import Inches, Pt
+from docx.styles.style import ParagraphStyle
 
 from book_indexer.curator import (
     CuratorOverrides,
@@ -50,6 +53,12 @@ from book_indexer.curator import (
     is_droppable_plural_variant,
 )
 from book_indexer.curator.fixture import EditorialOverrides
+from book_indexer.tables.ir import (
+    Locator,
+    TableOfCases,
+    TableOfRules,
+    TableOfStatutes,
+)
 
 from .cross_refs import CrossRefEntry, derive_cross_refs
 from .editorial_overrides import (
@@ -59,8 +68,8 @@ from .editorial_overrides import (
 )
 from .errors import FreezeError
 from .filter import is_cruft, is_removed
-from .ir import IndexEntry, IndexTree, SubEntry, SyntheticEntry
-from .markdown import _dedup_statute_entries, _normalize_statute_canonical
+from .ir import IndexEntry, IndexTree, SyntheticEntry
+from .markdown import _dedup_statute_entries
 from .metadata import Metadata
 from .parent_dedup import dedupe_parent_aliased_standalones
 from .plural_consolidation import (
@@ -68,12 +77,6 @@ from .plural_consolidation import (
     consolidate_plural_pairs,
 )
 from .range_collapse import collapse_locators
-from book_indexer.tables.ir import (
-    Locator,
-    TableOfCases,
-    TableOfRules,
-    TableOfStatutes,
-)
 
 __all__ = [
     "FROZEN_DT",
@@ -125,22 +128,22 @@ def register_index_styles(d: Document) -> None:
     """
     s = d.styles
 
-    h = s.add_style("IndexHeading", WD_STYLE_TYPE.PARAGRAPH)
+    h = cast(ParagraphStyle, s.add_style("IndexHeading", WD_STYLE_TYPE.PARAGRAPH))
     h.font.name = "Times New Roman"
     h.font.size = Pt(12)
     h.font.bold = True
 
-    e = s.add_style("IndexEntry", WD_STYLE_TYPE.PARAGRAPH)
+    e = cast(ParagraphStyle, s.add_style("IndexEntry", WD_STYLE_TYPE.PARAGRAPH))
     e.font.name = "Times New Roman"
     e.font.size = Pt(10)
     e.paragraph_format.left_indent = Inches(0)
 
-    sub = s.add_style("IndexSubentry", WD_STYLE_TYPE.PARAGRAPH)
+    sub = cast(ParagraphStyle, s.add_style("IndexSubentry", WD_STYLE_TYPE.PARAGRAPH))
     sub.font.name = "Times New Roman"
     sub.font.size = Pt(10)
     sub.paragraph_format.left_indent = Inches(0.25)
 
-    sub2 = s.add_style("IndexSubsubentry", WD_STYLE_TYPE.PARAGRAPH)
+    sub2 = cast(ParagraphStyle, s.add_style("IndexSubsubentry", WD_STYLE_TYPE.PARAGRAPH))
     sub2.font.name = "Times New Roman"
     sub2.font.size = Pt(10)
     sub2.paragraph_format.left_indent = Inches(0.5)
@@ -699,7 +702,7 @@ def render_docx(
         removal_set = overrides.removal_set
         keep_plural_set = overrides.keep_plural_set
         if overrides.recapitalize_pairs:
-            pairs = [tuple(p) for p in overrides.recapitalize_pairs]
+            pairs = [(p[0], p[1]) for p in overrides.recapitalize_pairs]
             assert_letters_only(pairs)
 
     # Phase 9 — D-07 ALLOW_STALE_OVERRIDES env-flag (mirrors markdown.py).
@@ -707,7 +710,7 @@ def render_docx(
         os.environ.get("ALLOW_STALE_OVERRIDES") == "1"
     )
 
-    d = Document()
+    d = _new_docx_document()
     register_index_styles(d)
     _render_metadata_into_doc(d, metadata)
 

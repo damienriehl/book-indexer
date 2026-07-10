@@ -50,7 +50,6 @@ from __future__ import annotations
 import argparse
 import filecmp
 import os
-import shutil
 import sys
 import tempfile
 import time
@@ -58,14 +57,13 @@ from pathlib import Path
 
 import orjson
 
+from book_indexer.curator import CuratorFixtureError, load_curator_overrides
+from book_indexer.curator.fixture import load_editorial_overrides
 from book_indexer.tables.ir import (
     TableOfCases,
     TableOfRules,
     TableOfStatutes,
 )
-
-from book_indexer.curator import CuratorFixtureError, load_curator_overrides
-from book_indexer.curator.fixture import load_editorial_overrides
 
 from . import IndexTree
 from .audit import build_audit_bundle
@@ -276,9 +274,9 @@ def _build(
             # sentinel error through main()'s formatter.
             if "PENDING_AUTHOR" in str(exc):
                 print(
-                    f"[render] editorial-overrides fixture unsigned "
-                    f"(PENDING_AUTHOR); skipping Phase 9 apply pass "
-                    f"(Wave 3 author-checkpoint pending).",
+                    "[render] editorial-overrides fixture unsigned "
+                    "(PENDING_AUTHOR); skipping Phase 9 apply pass "
+                    "(Wave 3 author-checkpoint pending).",
                     file=sys.stderr,
                 )
                 editorial_overrides = None

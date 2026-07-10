@@ -14,7 +14,8 @@ from __future__ import annotations
 
 import re
 from collections import Counter, defaultdict
-from typing import Sequence
+from collections.abc import Sequence
+from typing import cast
 
 from .normalizer import normalize
 from .types import PageExtraction, StrippedBlock, YBands
@@ -134,7 +135,10 @@ def strip_headers_footers(
                     position=_block_position(b, page_width),
                     text=text.strip(),
                     reason=reason,
-                    bbox=tuple(round(float(v), 2) for v in b["bbox"]),
+                    bbox=cast(
+                        "tuple[float, float, float, float]",
+                        tuple(round(float(v), 2) for v in b["bbox"]),
+                    ),
                 )
             )
             stripped[pdf_page].add(idx)
@@ -157,8 +161,8 @@ def extract_page_section(top_band_blocks: list[dict], detected_folio: str | None
     text = " ".join(
         span.get("text", "")
         for b in top_band_blocks
-        for l in b.get("lines", [])
-        for span in l.get("spans", [])
+        for ln in b.get("lines", [])
+        for span in ln.get("spans", [])
     )
     if detected_folio:
         text = re.sub(rf"\b{re.escape(detected_folio)}\b", "", text, flags=re.IGNORECASE)
