@@ -99,8 +99,9 @@ def test_sanitize_env_preserves_path_and_home(monkeypatch: pytest.MonkeyPatch) -
     env = _sanitize_env()
     # PATH is critical for locating ``claude`` on the child process.
     assert "PATH" in env
-    # HOME is critical for OAuth keychain reads.
-    assert "HOME" in env
+    # A home directory is critical for OAuth keychain reads. POSIX uses HOME;
+    # Windows uses USERPROFILE (or HOMEDRIVE+HOMEPATH).
+    assert "HOME" in env or "USERPROFILE" in env or "HOMEPATH" in env
 
 
 # ---------------------------------------------------------------------------

@@ -119,7 +119,10 @@ class InvokeResult:
 def _sanitize_env() -> dict[str, str]:
     """Build the child env for ``subprocess.run(env=...)``.
 
-    Keep:  HOME (OAuth keychain), PATH (locate ``claude``), XDG_* (for keychain),
+    Keep:  HOME (OAuth keychain; USERPROFILE/HOMEDRIVE/HOMEPATH are the Windows
+           equivalents), PATH (locate ``claude``), XDG_* (for keychain),
+           Windows runtime vars (APPDATA/LOCALAPPDATA/SYSTEMROOT/PATHEXT/TEMP/TMP
+           — required for a child process to spawn at all on Windows),
            determinism vars (TZ, LC_ALL, PYTHONHASHSEED).
     Force: TZ=UTC, LC_ALL=C.UTF-8, PYTHONHASHSEED=0 (if unset).
     Drop:  CLAUDE_CODE_* (tool runtime vars that could perturb output),
@@ -127,7 +130,12 @@ def _sanitize_env() -> dict[str, str]:
            which we don't use, but defensive).
     """
     src = os.environ
-    keep_keys = ("HOME", "PATH", "USER", "LOGNAME")
+    keep_keys = (
+        "HOME", "PATH", "USER", "LOGNAME",
+        # Windows equivalents / requirements.
+        "USERPROFILE", "HOMEDRIVE", "HOMEPATH",
+        "APPDATA", "LOCALAPPDATA", "SYSTEMROOT", "PATHEXT", "TEMP", "TMP",
+    )
     xdg_keys = tuple(k for k in src if k.startswith("XDG_"))
     env: dict[str, str] = {}
     for k in keep_keys + xdg_keys:
