@@ -234,18 +234,25 @@ def synthetic_corpus_builder() -> Iterator[Callable[[SyntheticSpec], sqlite3.Con
     result was a wall of ``PytestUnraisableExceptionWarning`` ExceptionGroups
     on the 3.13 legs, attributed to whatever unrelated test happened to be
     running when the collector fired.
+
+    Closing at teardown is not enough on its own: Hypothesis runs ~100 examples
+    inside a single test, so the collector fires *during* the test and the
+    warning still lands. Every caller uses one corpus at a time, so each new
+    request retires the previous connection and at most one is ever open.
     """
-    handed_out: list[sqlite3.Connection] = []
+    live: list[sqlite3.Connection] = []
 
     def _tracked(spec: SyntheticSpec) -> sqlite3.Connection:
+        while live:
+            live.pop().close()
         conn = _build_synthetic(spec)
-        handed_out.append(conn)
+        live.append(conn)
         return conn
 
     yield _tracked
 
-    for conn in handed_out:
-        conn.close()
+    while live:
+        live.pop().close()
 
 
 @pytest.fixture
