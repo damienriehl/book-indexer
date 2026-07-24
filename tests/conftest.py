@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import os
 import sqlite3
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -222,10 +222,30 @@ def _build_synthetic(spec: SyntheticSpec) -> sqlite3.Connection:
 
 
 @pytest.fixture
-def synthetic_corpus_builder() -> Callable[[SyntheticSpec], sqlite3.Connection]:
+def synthetic_corpus_builder() -> Iterator[Callable[[SyntheticSpec], sqlite3.Connection]]:
     """Factory fixture: callers build a SyntheticSpec and get a fresh
-    in-memory sqlite3.Connection for each Hypothesis example."""
-    return _build_synthetic
+    in-memory sqlite3.Connection for each Hypothesis example.
+
+    Every connection handed out is closed at teardown. Hypothesis calls the
+    factory once per generated example, so without this the connections pile
+    up until the garbage collector reaps them — and from Python 3.13 onward a
+    GC'd open ``sqlite3.Connection`` emits a ``ResourceWarning``, which this
+    suite escalates to an error (``filterwarnings = ["error", ...]``). The
+    result was a wall of ``PytestUnraisableExceptionWarning`` ExceptionGroups
+    on the 3.13 legs, attributed to whatever unrelated test happened to be
+    running when the collector fired.
+    """
+    handed_out: list[sqlite3.Connection] = []
+
+    def _tracked(spec: SyntheticSpec) -> sqlite3.Connection:
+        conn = _build_synthetic(spec)
+        handed_out.append(conn)
+        return conn
+
+    yield _tracked
+
+    for conn in handed_out:
+        conn.close()
 
 
 @pytest.fixture

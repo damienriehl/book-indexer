@@ -70,12 +70,26 @@ jobs:
       - name: Pyright type-check
         run: uv run --extra dev pyright
 
-      - name: Pytest (coverage)
+      # Coverage is only consumed by the ubuntu/3.12 Codecov upload below, and
+      # coverage.py's C tracer is what turns PyMuPDF's SWIG `_mupdf` import into
+      # a segfault on macOS arm64 (probes above prove a plain `import pymupdf`
+      # is fine there — the crash only appears under `pytest --cov`). Running it
+      # only where it is used both fixes macOS and speeds up every other leg.
+      - name: Pytest (with coverage)
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
         env:
           HYPOTHESIS_PROFILE: ci
           PYTHONHASHSEED: "0"
           TZ: UTC
         run: uv run --extra dev pytest --cov=book_indexer --cov-report=xml -q
+
+      - name: Pytest
+        if: "!(matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12')"
+        env:
+          HYPOTHESIS_PROFILE: ci
+          PYTHONHASHSEED: "0"
+          TZ: UTC
+        run: uv run --extra dev pytest -q
 
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
