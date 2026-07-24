@@ -216,5 +216,6 @@ document, this is a direct consequence of linking PyMuPDF (itself AGPL-3.0) as
 the default PDF backend. Any distribution of this package — or any network
 service built on it — is governed by the AGPL-3.0.
 
-See [LICENSE](LICENSE) for the full license text and [NOTICE](NOTICE) for the
-third-party component inventory and the rationale behind the license choice.
+See [LICENSE](LICENSE) for the full license text, [NOTICE](NOTICE) for the
+rationale behind the license choice, and [THIRD-PARTY.md](THIRD-PARTY.md) for the
+per-component inventory — every dependency, its license, and what it does.

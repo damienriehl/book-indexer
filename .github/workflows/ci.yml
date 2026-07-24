@@ -26,6 +26,11 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: ["3.12", "3.13"]
+    env:
+      # Pin EVERY uv invocation (sync AND run) to the matrix interpreter. Without
+      # this, `uv run` re-resolves the environment on its own and the py3.13 legs
+      # silently executed against a 3.12 venv (observed in run 29126576478).
+      UV_PYTHON: ${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v4
 
@@ -39,6 +44,22 @@ jobs:
 
       - name: Sync dependencies
         run: uv sync --extra dev --python ${{ matrix.python-version }}
+
+      - name: Report interpreter (matrix drift guard)
+        run: uv run --extra dev python -c "import sys; print(sys.version); assert sys.version_info[:2] == tuple(int(p) for p in '${{ matrix.python-version }}'.split('.')), 'interpreter drift'"
+
+      # Diagnostic for the long-standing macOS arm64 segfault: does `import
+      # pymupdf` crash on its own, or only once pytest has already pulled in
+      # spaCy/numpy/blis (an OpenMP-style native conflict we could fix by
+      # import ordering)? Split into two isolated processes so the answer is
+      # unambiguous in the log. Non-fatal — never blocks the leg.
+      - name: PyMuPDF import probe (isolated vs. spaCy-first)
+        continue-on-error: true
+        run: |
+          echo "--- probe 1: pymupdf alone ---"
+          uv run --extra dev python -c "import pymupdf; print('pymupdf', pymupdf.__doc__)" && echo "probe1 OK" || echo "probe1 CRASH rc=$?"
+          echo "--- probe 2: spacy first, then pymupdf ---"
+          uv run --extra dev python -c "import spacy, pymupdf; print('both OK')" && echo "probe2 OK" || echo "probe2 CRASH rc=$?"
 
       - name: Download spaCy model
         run: uv run --extra dev python -m spacy download en_core_web_lg
