@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from collections.abc import Iterator
 from pathlib import Path
 
 import orjson
@@ -140,8 +141,10 @@ def synth_db(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def synth_ro_conn(synth_db: Path) -> sqlite3.Connection:
-    return sqlite3.connect(f"file:{synth_db}?mode=ro", uri=True)
+def synth_ro_conn(synth_db: Path) -> Iterator[sqlite3.Connection]:
+    conn = sqlite3.connect(f"file:{synth_db}?mode=ro", uri=True)
+    yield conn
+    conn.close()  # Python 3.13 warns (→ error here) on a GC'd open connection
 
 
 # -----------------------------------------------------------------------------

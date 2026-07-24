@@ -8,6 +8,7 @@ Hypothesis property coverage lives in tests/property/ (Plan 02-03).
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Iterator
 
 import pytest
 
@@ -56,8 +57,21 @@ def _build_synthetic(folio: str = "42") -> sqlite3.Connection:
     return conn
 
 
-def test_verify_yields_evidence_for_known_term():
+@pytest.fixture
+def synthetic_conn() -> Iterator[sqlite3.Connection]:
+    """The default 1-page corpus, closed at teardown.
+
+    Python 3.13 raises a ResourceWarning when it garbage-collects an open
+    sqlite3.Connection, and this suite turns warnings into errors — so a
+    connection left open here fails an unrelated test later.
+    """
     conn = _build_synthetic()
+    yield conn
+    conn.close()
+
+
+def test_verify_yields_evidence_for_known_term(synthetic_conn):
+    conn = synthetic_conn
     results = list(verify("voir dire", conn))
     assert len(results) == 1
     ev = results[0]
@@ -72,22 +86,22 @@ def test_verify_yields_evidence_for_known_term():
     assert "voir dire" in ev.verbatim_snippet.lower()
 
 
-def test_verify_raises_on_empty_term():
-    conn = _build_synthetic()
+def test_verify_raises_on_empty_term(synthetic_conn):
+    conn = synthetic_conn
     with pytest.raises(ValueError, match="non-empty"):
         list(verify("", conn))
     with pytest.raises(ValueError, match="non-empty"):
         list(verify("   ", conn))
 
 
-def test_verify_returns_empty_for_absent_term():
-    conn = _build_synthetic()
+def test_verify_returns_empty_for_absent_term(synthetic_conn):
+    conn = synthetic_conn
     assert list(verify("xyzzy_sentinel_42", conn)) == []
 
 
-def test_verify_deterministic_two_calls():
+def test_verify_deterministic_two_calls(synthetic_conn):
     """D-04 contract: list(verify(t,c)) == list(verify(t,c))."""
-    conn = _build_synthetic()
+    conn = synthetic_conn
     a = list(verify("voir dire", conn))
     b = list(verify("voir dire", conn))
     assert a == b
@@ -95,9 +109,9 @@ def test_verify_deterministic_two_calls():
     assert set(a) == set(b)
 
 
-def test_verify_accepts_variants_for_callable():
+def test_verify_accepts_variants_for_callable(synthetic_conn):
     """Acronym mode — variants_for callable provides alternate surface forms."""
-    conn = _build_synthetic()
+    conn = synthetic_conn
 
     def variants(_term: str) -> list[str]:
         return []  # no variants for voir dire → same result as None
@@ -126,4 +140,7 @@ def test_verify_skips_section_paths_with_null_parent():
             "VALUES (1, ?, ?, ?, ?, 'body', NULL, '[0,0,0,0]', 10.98, 'CS', 0, 99)",
             (i, w, w, w),
         )
-    assert list(verify("hearsay", conn)) == []
+    try:
+        assert list(verify("hearsay", conn)) == []
+    finally:
+        conn.close()
