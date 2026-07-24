@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import os
 import sqlite3
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -222,10 +222,37 @@ def _build_synthetic(spec: SyntheticSpec) -> sqlite3.Connection:
 
 
 @pytest.fixture
-def synthetic_corpus_builder() -> Callable[[SyntheticSpec], sqlite3.Connection]:
+def synthetic_corpus_builder() -> Iterator[Callable[[SyntheticSpec], sqlite3.Connection]]:
     """Factory fixture: callers build a SyntheticSpec and get a fresh
-    in-memory sqlite3.Connection for each Hypothesis example."""
-    return _build_synthetic
+    in-memory sqlite3.Connection for each Hypothesis example.
+
+    Every connection handed out is closed at teardown. Hypothesis calls the
+    factory once per generated example, so without this the connections pile
+    up until the garbage collector reaps them — and from Python 3.13 onward a
+    GC'd open ``sqlite3.Connection`` emits a ``ResourceWarning``, which this
+    suite escalates to an error (``filterwarnings = ["error", ...]``). The
+    result was a wall of ``PytestUnraisableExceptionWarning`` ExceptionGroups
+    on the 3.13 legs, attributed to whatever unrelated test happened to be
+    running when the collector fired.
+
+    Closing at teardown is not enough on its own: Hypothesis runs ~100 examples
+    inside a single test, so the collector fires *during* the test and the
+    warning still lands. Every caller uses one corpus at a time, so each new
+    request retires the previous connection and at most one is ever open.
+    """
+    live: list[sqlite3.Connection] = []
+
+    def _tracked(spec: SyntheticSpec) -> sqlite3.Connection:
+        while live:
+            live.pop().close()
+        conn = _build_synthetic(spec)
+        live.append(conn)
+        return conn
+
+    yield _tracked
+
+    while live:
+        live.pop().close()
 
 
 @pytest.fixture
@@ -280,6 +307,8 @@ def make_simple_phrase_corpus(
                 for i, (text, norm, lemma) in enumerate(prose)
             ],
         )
-        return _build_synthetic(spec), 3, ("§1", "§1.01")
+        # Go through the injected builder, not _build_synthetic directly — the
+        # builder is what closes each corpus before handing out the next one.
+        return synthetic_corpus_builder(spec), 3, ("§1", "§1.01")
 
     return _factory

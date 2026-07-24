@@ -14,11 +14,23 @@ jobs:
   test:
     name: test (${{ matrix.os }} / py${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
-    # macOS is non-blocking: PyMuPDF (the AGPL PDF backend) segfaults at
-    # `import pymupdf` on the macos-latest arm64 runner — a native MuPDF crash
-    # upstream of this project, not a code defect (Ruff + Pyright pass on macOS;
-    # only the pytest import crashes). Kept in the matrix for visibility so the
-    # leg goes green once a PyMuPDF release fixes the arm64 import. Remove this
+    # macOS is non-blocking: PyMuPDF's SWIG `_mupdf` extension segfaults on the
+    # macos-latest arm64 runner, but ONLY under pytest. Ruff and Pyright pass.
+    #
+    # Investigated 2026-07-24 (runs 30126778151 / 30128104933 / 30128286569).
+    # Ruled OUT, each with a probe in the log — do not re-try these:
+    #   * "upstream arm64 wheel bug, wait for a PyMuPDF release" (the comment
+    #     that used to live here) — probe 1 imports pymupdf fine on arm64, and
+    #     1.28.0 is already the newest release, so there is nothing to wait for
+    #   * a native conflict with spaCy/numpy/blis — probe 2 (spaCy first) is fine
+    #   * coverage.py's C tracer — it still crashes under plain `pytest -q`
+    #   * pytest's assertion rewriting — probes 3 and 4 crash identically with
+    #     and without `--assert=plain`
+    #
+    # So it is something else pytest brings into the process before the import
+    # (conftest imports, or a plugin: hypothesis / pytest-cov / pytest-randomly).
+    # The next cheap step is bisecting those with `-p no:<plugin>` probes.
+    # Left non-blocking because macOS is not a target platform here. Remove this
     # line to re-block on macOS.
     continue-on-error: ${{ matrix.os == 'macos-latest' }}
     strategy:
@@ -48,18 +60,25 @@ jobs:
       - name: Report interpreter (matrix drift guard)
         run: uv run --extra dev python -c "import sys; print(sys.version); assert sys.version_info[:2] == tuple(int(p) for p in '${{ matrix.python-version }}'.split('.')), 'interpreter drift'"
 
-      # Diagnostic for the long-standing macOS arm64 segfault: does `import
-      # pymupdf` crash on its own, or only once pytest has already pulled in
-      # spaCy/numpy/blis (an OpenMP-style native conflict we could fix by
-      # import ordering)? Split into two isolated processes so the answer is
-      # unambiguous in the log. Non-fatal — never blocks the leg.
-      - name: PyMuPDF import probe (isolated vs. spaCy-first)
+      # Narrowing the long-standing macOS arm64 segfault. Established so far
+      # (run 30128104933): probes 1 and 2 pass, so importing PyMuPDF is fine on
+      # arm64 both alone and after spaCy — it is NOT the upstream wheel bug the
+      # old comment claimed. It also still crashes with coverage disabled, so
+      # coverage.py's tracer is not the trigger either. What remains is pytest
+      # itself: the traceback enters via `_pytest/assertion/rewrite.py`, so
+      # probes 3 and 4 isolate assertion rewriting (collect-only still imports
+      # the module, which is all it takes to crash). Non-fatal — never blocks.
+      - name: PyMuPDF import probes
         continue-on-error: true
         run: |
           echo "--- probe 1: pymupdf alone ---"
           uv run --extra dev python -c "import pymupdf; print('pymupdf', pymupdf.__doc__)" && echo "probe1 OK" || echo "probe1 CRASH rc=$?"
           echo "--- probe 2: spacy first, then pymupdf ---"
           uv run --extra dev python -c "import spacy, pymupdf; print('both OK')" && echo "probe2 OK" || echo "probe2 CRASH rc=$?"
+          echo "--- probe 3: pytest collect WITH assertion rewriting ---"
+          uv run --extra dev pytest -q --co tests/integration/test_sample_verify_end_to_end.py >/dev/null && echo "probe3 OK" || echo "probe3 CRASH rc=$?"
+          echo "--- probe 4: pytest collect WITHOUT assertion rewriting ---"
+          uv run --extra dev pytest -q --co --assert=plain tests/integration/test_sample_verify_end_to_end.py >/dev/null && echo "probe4 OK" || echo "probe4 CRASH rc=$?"
 
       - name: Download spaCy model
         run: uv run --extra dev python -m spacy download en_core_web_lg
@@ -70,12 +89,26 @@ jobs:
       - name: Pyright type-check
         run: uv run --extra dev pyright
 
-      - name: Pytest (coverage)
+      # Coverage runs only where it is consumed (the ubuntu/3.12 Codecov upload
+      # below). Splitting it out was first tried as a macOS segfault fix; that
+      # hypothesis was WRONG — macOS still crashes under plain `pytest -q` — but
+      # the split is kept because it is correct on its own terms and makes the
+      # other five legs faster.
+      - name: Pytest (with coverage)
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
         env:
           HYPOTHESIS_PROFILE: ci
           PYTHONHASHSEED: "0"
           TZ: UTC
         run: uv run --extra dev pytest --cov=book_indexer --cov-report=xml -q
+
+      - name: Pytest
+        if: "!(matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12')"
+        env:
+          HYPOTHESIS_PROFILE: ci
+          PYTHONHASHSEED: "0"
+          TZ: UTC
+        run: uv run --extra dev pytest -q
 
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
