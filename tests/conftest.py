@@ -307,6 +307,8 @@ def make_simple_phrase_corpus(
                 for i, (text, norm, lemma) in enumerate(prose)
             ],
         )
-        return _build_synthetic(spec), 3, ("§1", "§1.01")
+        # Go through the injected builder, not _build_synthetic directly — the
+        # builder is what closes each corpus before handing out the next one.
+        return synthetic_corpus_builder(spec), 3, ("§1", "§1.01")
 
     return _factory
