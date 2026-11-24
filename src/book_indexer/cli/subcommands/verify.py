@@ -1,4 +1,4 @@
-"""``index-book verify-against OLD_INDEX_TREE PDF`` — D-04 entry-level IR diff.
+"""``book-index verify-against OLD_INDEX_TREE PDF`` — D-04 entry-level IR diff.
 
 Per CONTEXT 06 D-04:
 

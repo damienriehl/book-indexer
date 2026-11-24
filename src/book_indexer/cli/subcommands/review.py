@@ -1,4 +1,4 @@
-"""``index-book review --sample N`` — QUAL-02 deterministic stratified sample.
+"""``book-index review --sample N`` — QUAL-02 deterministic stratified sample.
 
 Per CONTEXT 06 D-06 + RESEARCH §H-7:
 
@@ -11,7 +11,7 @@ Per CONTEXT 06 D-06 + RESEARCH §H-7:
 * Emit ``artifacts/audit/sample_review.md`` — checkbox markdown listing the
   first 3 locators per entry with ≤120-char ``verbatim_snippet``.
 * First-run path: if ``index_tree.json`` doesn't exist, emit a placeholder
-  pointing the user to ``index-book build PDF`` first (D-06 first-run policy).
+  pointing the user to the build command (D-06 first-run policy).
 
 The ``[project.scripts]`` entry-point app provides a typer ``--sample N``
 flag (default 20) that calls into this ``run(sample=N)`` function.

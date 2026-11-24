@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Corrected the README's CLI and Python API examples and documented where
+  the sample PDF stops in the pipeline.
+- Clarified that the tables stage always uses the bundled legal resolver.
+- Updated the verifier docstring and CLI help to match the public API and command name.
+
 ## [0.1.0] - 2026-07-07
 
 Initial public release, extracted from an internal project into a standalone

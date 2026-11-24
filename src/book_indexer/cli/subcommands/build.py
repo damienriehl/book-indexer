@@ -1,4 +1,4 @@
-"""``index-book build PDF`` (default subcommand).
+"""``book-index build PDF``.
 
 Wires together Phases 1-5 sub-pipelines based on ``--rebuild-*`` flags
 (CONTEXT 06 D-03 + D-05 + RESEARCH §H-1 / Open-Q1 / §H-13 Pitfall 6):

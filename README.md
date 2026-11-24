@@ -11,7 +11,7 @@ book-indexer is licensed **AGPL-3.0-only**, because its default PDF-extraction b
 - [Use cases](#use-cases)
 - [Feature highlights](#feature-highlights)
 - [Install](#install)
-- [Five-minute tutorial: index your first book](#five-minute-tutorial-index-your-first-book)
+- [Try the sample PDF](#try-the-sample-pdf)
 - [How it works](#how-it-works)
 - [Configuration](#configuration)
 - [License](#license)
@@ -23,18 +23,13 @@ number in a printed treatise is a defect that ships to every reader. book-indexe
 automates the *discovery* of index-worthy concepts while refusing to let any
 statistical model guess a page number.
 
-The whole package is organized around one guarantee:
+> `verify()` is the sole source of page locators. It yields `Evidence` only for
+> occurrences it confirms in the extracted page text and links to a section.
 
-> `verify(term, folio, conn) -> Evidence | None` is the **sole** code path that
-> emits a page citation.
-
-Concept *discovery* may use NLP — and, optionally, an LLM — to decide *what*
-belongs in the index. But the *locator* for every `(term, page)` pair is always
-produced by `verify()`, which searches the actual extracted PDF text and returns
-`Evidence` only when the term genuinely appears on that page (otherwise `None`).
-Because the citation path is fully symbolic and deterministic, the same input PDF
-always produces a **byte-identical** index, table of authorities, and audit trail
-across runs.
+Concept discovery can use NLP or an optional LLM to decide what belongs in the
+index. The verifier searches the corpus for each term, across all pages. Each
+match includes the printed folio, PDF page number, section reference, and a
+verbatim snippet. If the verifier finds no matches, it yields nothing.
 
 ## Who it's for
 
@@ -55,114 +50,113 @@ across runs.
 
 ## Use cases
 
-- **Index a legal treatise.** Point book-indexer at a chapter-and-section PDF and
-  get a Markdown + DOCX subject index with printed-folio page references, plus a
-  table of authorities for the cases and statutes it cites.
+- **Index a legal treatise.** For a PDF with supported headings, the pipeline
+  can build a subject index with printed-folio references and tables of
+  authorities in Markdown and DOCX.
 - **Build a table of authorities for a brief or opinion.** Run the citation-tables
   stage over a court opinion to extract and canonicalize case, statute, and rule
   citations using eyecite + reporters-db + courts-db.
-- **Regenerate an index reproducibly in CI.** Because output is byte-identical
-  across runs, you can commit the generated index and fail a build if a source
-  edit silently changes it.
+- **Check a completed build.** Replay compares regenerated artifacts with the
+  saved build and returns an error if they differ.
 - **Audit an existing index.** Feed a manuscript through the pipeline and compare
   the machine-verified locators against a hand-built index to catch stale or
   wrong page numbers.
-- **Prototype a domain-specific indexer.** Adapt `book.toml` (heading regex,
-  lemma overrides, citation-tables plugin) to a new jurisdiction or citation
-  style without touching package source.
 
 ## Feature highlights
 
-- **Verified locators only.** `verify()` is the sole page-number emitter; a page
-  cite exists only if the term is symbolically confirmed on that page.
-- **Byte-identical, reproducible output.** Same input PDF ⇒ same index, tables,
-  and audit artifacts, every run — diffable in version control.
+- **Verified locators only.** The verifier confirms each locator against the
+  page text.
+- **Reproducible output.** Replay compares the regenerated index, tables, and
+  audit artifacts byte for byte with the previous build.
 - **Printed-folio citations.** The public citation is the *printed* folio
   (e.g. page 748), resolved from the page text — never the raw PDF page ordinal.
 - **Multi-pass concept discovery.** spaCy noun-phrase extraction, doctrinal-term
   and named-entity passes, with optional LLM-assisted discovery — none of which
   can assign a page number.
-- **Legal tables of authorities.** Bundled `legal-citations` plugin extracts and
-  canonicalizes cases, statutes, and rules via eyecite + reporters-db + courts-db.
+- **Legal tables of authorities.** The bundled `legal-citations` resolver
+  extracts and canonicalizes cases, statutes, and rules.
 - **Professional output formats.** Emits Markdown and DOCX indexes plus audit
   artifacts for review.
-- **Pluggable citation tables.** Plugins register under the `book_indexer.tables`
-  entry-point group so new domains can supply their own table builders.
-- **Config-driven domains.** `book.toml` captures heading regexes, ground-truth
-  fixtures, lemma overrides, and plugin selection per corpus.
 
 ## Install
 
-```bash
-uv add book-indexer
-# or:
-pip install book-indexer
-```
-
-book-indexer requires the spaCy large English model for its NLP passes. After
-installing the package, download the model once:
+From the repository root, use [uv](https://docs.astral.sh/uv/) to install the
+package and download the spaCy model:
 
 ```bash
-python -m spacy download en_core_web_lg
+uv sync --extra dev
+uv run --extra dev python -m spacy download en_core_web_lg
 ```
 
-## Five-minute tutorial: index your first book
+## Try the sample PDF
 
-This walkthrough indexes the bundled synthetic treatise,
-`samples/synthetic_treatise.pdf` (a 10-page public-domain sample). Make sure you
-have installed book-indexer and the `en_core_web_lg` model (see [Install](#install)).
+Run these examples from the repository root after completing [Install](#install).
+They use `samples/synthetic_treatise.pdf`, a 10-page synthetic sample. Ingest
+extracts its text and printed folios. The sample lacks the heading fonts the
+section detector expects, so concept discovery produces no candidates and a
+full build stops at assembly.
 
-### 1. Run the full pipeline from the CLI
-
-The installed `book-index` script runs every deterministic stage end to end:
+### 1. Inspect the CLI
 
 ```bash
-book-index run samples/synthetic_treatise.pdf --out build/
+uv run --extra dev book-index --help
 ```
 
-When it finishes, the Markdown index lands at `build/index.md`, the DOCX index at
-`build/index.docx`, the tables of authorities alongside them, and the audit
-artifacts under `build/audit/`. Run the same command twice and diff the outputs —
-they are byte-identical.
+The `build` command takes a PDF path. With `--rebuild-all`, it passes that
+path to ingest and runs the downstream stages. Tables and assembly still
+default to the bundled sample. Plain `build` renders from existing artifacts.
+A successful build writes the subject index and tables of authorities to
+`artifacts/render/index.md` and `artifacts/render/index.docx`. The
+sections-only versions (`index_sections_only.md` and `index_sections_only.docx`)
+share that directory. Find the audit files in `artifacts/audit/`.
 
-### 2. Or run the stages individually
+`book-index replay` needs artifacts from all four downstream stages. It
+regenerates their outputs for a byte-for-byte comparison. Its tables and
+assembly replay steps also use the bundled sample PDF.
 
-Each pipeline stage is also runnable as a module, which is handy for inspecting
-intermediate artifacts:
+### 2. Run sample stages
+
+Run ingest, concept discovery, and citation tables in order. The stages share
+`artifacts/`. Set the hash seed, time zone, and locale before running them.
 
 ```bash
-python -m book_indexer.ingest   samples/synthetic_treatise.pdf --out build/
-python -m book_indexer.concepts build/
-python -m book_indexer.tables   build/
-python -m book_indexer.assembly build/
-python -m book_indexer.render   build/
+export PYTHONHASHSEED=0 TZ=UTC LC_ALL=C.UTF-8
+uv run --extra dev python -m book_indexer.ingest samples/synthetic_treatise.pdf
+uv run --extra dev python -m book_indexer.concepts build
+uv run --extra dev python -m book_indexer.tables build
 ```
 
-### 3. Use the public Python API
+For a corpus with concept candidates, the `book_indexer.assembly` module's
+`build` subcommand creates the index tree. The `book_indexer.render` module's
+`build` subcommand then renders it.
 
-The same functionality is available programmatically. `import book_indexer` stays
-instant — heavy backends (PyMuPDF, spaCy) load lazily on first use:
+### 3. Use the Python API
+
+Run the snippet with `uv run --extra dev python -`. It reads the sample PDF path
+from `book.toml` and builds a SQLite corpus. The word “procedure” appears in the
+sample. The verifier reports zero occurrences because the sample has no detected
+sections.
 
 ```python
-import book_indexer
+import sqlite3
+from contextlib import closing
 
-# Load domain configuration and ingest the PDF (text/char extraction,
-# printed-folio resolution, section-tree detection).
-config = book_indexer.load_book_config("book.toml")
-ingest = book_indexer.run_ingest("samples/synthetic_treatise.pdf", config=config)
+from book_indexer import load_book_config, run_ingest
+from book_indexer.verify import verify
 
-# verify() is the ONLY function that produces a page citation. It confirms the
-# term actually appears on the given printed folio, returning Evidence or None.
-evidence = book_indexer.verify("negligence", folio="3", conn=ingest.conn)
-if evidence is not None:
-    print("confirmed on printed folio", evidence.folio)
-else:
-    print("term not present on that folio — no citation emitted")
+config = load_book_config("book.toml")
+corpus_path = run_ingest(config.source_pdf, "artifacts/api-example")
+with closing(sqlite3.connect(corpus_path.as_uri() + "?mode=ro", uri=True)) as conn:
+    matches = list(verify("procedure", conn))
 
-# Assemble the verified concepts into an index tree and render Markdown.
-tree = book_indexer.build_index_tree(ingest)
-markdown = book_indexer.render_markdown(tree)
+for evidence in matches:
+    print(evidence.folio, evidence.section_ref, evidence.verbatim_snippet)
+print(f"Verified occurrences: {len(matches)}")
 ```
+
+See [assembly's entry point](src/book_indexer/assembly/__main__.py) and
+[rendering's entry point](src/book_indexer/render/__main__.py) for the full
+assembly and rendering calls.
 
 ## How it works
 
@@ -174,40 +168,34 @@ book-indexer is a deterministic pipeline of five stages:
 2. **Concept discovery** — spaCy noun-phrase, doctrinal-term, and named-entity
    passes propose index-worthy concepts. Optional LLM discovery can propose more.
    No pass in this stage may assign a page number.
-3. **Citation tables** — the selected tables plugin (bundled `legal-citations`,
-   built on eyecite + reporters-db + courts-db) extracts and canonicalizes cases,
-   statutes, and rules.
+3. **Citation tables** — the bundled `legal-citations` resolver extracts and
+   canonicalizes cases, statutes, and rules using eyecite, reporters-db, and courts-db.
 4. **Canonicalization & assembly** — concepts are lemmatized/merged and organized
    into the index tree; each concept is either placed in the index or explicitly
    classified out.
 5. **Rendering** — the index and tables of authorities are emitted as Markdown and
    DOCX, alongside audit artifacts.
 
-The invariant that ties it together: **`verify()` is the sole code path that emits
-a page citation.** Discovery decides *what* to index; `verify()` decides *where*
-it may be cited, by symbolically confirming the term against the extracted page
-text. This is why every output is byte-identical across runs. These properties are
-enforced by CI invariant tests — including that the LLM's JSON schema has zero
-page-like fields, that `src/` imports no LLM SDK, and that the printed folio (not
-the PDF ordinal) is the public citation.
+Call `verify(term, conn, *, variants_for=None) -> Iterator[Evidence]` to look up
+a term in the SQLite corpus. The iterator yields one record per verified
+occurrence in page and token order. Invariant tests enforce the single locator
+source, the absence of page-like fields in the LLM schema, the absence of LLM SDK
+imports in `src/`, and the use of printed folios for public citations.
 
 ## Configuration
 
-Two files separate *package* configuration from *domain* configuration:
+Two files separate package configuration from domain configuration.
 
 - **`pyproject.toml`** — package configuration (dependencies, entry points,
   tooling). You don't normally edit this to index a book.
-- **`book.toml`** — domain/corpus configuration for the specific volume you are
-  indexing. It holds the source PDF path, the section-heading regex, optional
-  hand-verified section/folio ground-truth fixtures, lemma overrides for the
-  canonicalizer, and the citation-tables plugin to load. Copy and edit it to
-  adapt the indexer to a new treatise, jurisdiction, or citation style without
-  touching package source.
+- **`book.toml`** — domain configuration for a volume. It stores the source PDF
+  path, the section-heading regex, optional section and folio fixtures, and
+  lemma overrides.
 
-Citation-tables plugins register under the **`book_indexer.tables`** entry-point
-group. The bundled `legal-citations` plugin ships in v0.1; select it (or a custom
-plugin) via the `[tables] plugin = "..."` key in `book.toml`. Additional
-non-legal-domain plugins are on the roadmap.
+Plugin selection is not wired yet. The config loader parses the `plugin` key
+under `[tables]`, and the package declares the `book_indexer.tables` entry-point
+group. Both are reserved for future plugin loading. In v0.1 the tables stage
+always runs the bundled `legal-citations` resolver.
 
 ## License
 
