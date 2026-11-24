@@ -10,9 +10,7 @@ Run the full suite from the repository root.
 uv run --extra dev pytest -q
 ```
 
-uv installs the locked Python dependencies and the dev extra. The suite also
-requires the spaCy model `en_core_web_lg`, which the lockfile omits. See
-[Development setup](CONTRIBUTING.md#development-setup) for the model setup.
+Cloud sessions install the spaCy model `en_core_web_lg` through the session-start hook. For local setup, follow [CONTRIBUTING.md](CONTRIBUTING.md#development-setup).
 
 ## Layout
 

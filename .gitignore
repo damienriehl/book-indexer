@@ -16,6 +16,8 @@ dist/
 .pyright/
 # Local session state
 .claude/*
+!.claude/settings.json
+!.claude/hooks/
 /.task-context/
 # Pipeline outputs
 artifacts/
