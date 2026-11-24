@@ -1,10 +1,11 @@
 """book-indexer — a deterministic back-of-book indexer with symbolic
 page-citation verification.
 
-Core guarantee: ``verify(term, folio, conn) -> Evidence | None`` is the *sole*
-code path that emits a page citation. The LLM (used only for optional concept
-discovery) never assigns a page number. This invariant is enforced by a
-static-analysis test (``tests/invariants/test_verify_is_sole_locator_source.py``).
+Core guarantee: ``verify(term, conn, *, variants_for=None) -> Iterator[Evidence]``
+is the sole source of page locators. It yields evidence for each verified
+occurrence in the page text. The LLM never assigns a page number. The
+static-analysis test ``tests/invariants/test_verify_is_sole_locator_source.py``
+enforces this invariant.
 
 The public API is exposed lazily (PEP 562) so ``import book_indexer`` stays
 instant and does not eagerly import PyMuPDF or spaCy.

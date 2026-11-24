@@ -4,15 +4,10 @@ CRITICAL determinism settings (mitigate RESEARCH §H-13 Pitfall 1):
 
 * ``pretty_exceptions_enable=False`` — disable Rich tracebacks (ANSI in CI logs).
 * ``add_completion=False`` — drop locale-dependent completion subcommand.
-* ``no_args_is_help=True`` — bare ``index-book`` prints help and exits 0.
+* ``no_args_is_help=True`` — bare ``book-index`` prints help.
 
 Subcommand registration is flat (no ``add_typer`` / sub-app composition). Mirrors
 sibling ``__main__.py`` argparse shapes (``assembly/``, ``tables/``, ``render/``).
-
-Plan 06-00 (this plan) ships all 4 subcommand bodies as stubs that print
-``"Not yet implemented"`` and return 0 — keeping ``index-book --help``
-byte-deterministic for OUT-04 / QUAL-01 verification before Plan 06-01 fills
-bodies.
 """
 from __future__ import annotations
 
@@ -26,7 +21,7 @@ from .subcommands import review as _review_mod
 from .subcommands import verify as _verify_mod
 
 app = typer.Typer(
-    name="index-book",
+    name="book-index",
     help="Deterministic legal-textbook indexer (book-indexer).",
     no_args_is_help=True,
     add_completion=False,

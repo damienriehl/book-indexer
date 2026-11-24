@@ -1,8 +1,8 @@
 """CLI entry: ``python -m book_indexer.ingest <pdf> [--out-dir PATH]``.
 
 Minimal argparse wrapper around :func:`book_indexer.ingest.pipeline.run_ingest`.
-The final ``index-book`` CLI lives in Phase 6; this is the dev / test entry
-point that Plan 01-05's determinism gate drives via ``subprocess.run``.
+This entry point runs ingest by itself. Use ``book-index build --rebuild-all``
+with a PDF to run the full pipeline.
 """
 from __future__ import annotations
 

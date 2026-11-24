@@ -1,4 +1,4 @@
-"""``index-book replay`` — QUAL-01 byte-identity sweep across 4 sub-pipelines.
+"""``book-index replay`` — QUAL-01 byte-identity sweep across 4 sub-pipelines.
 
 Per RESEARCH §H-9 cascade order: invoke ``concepts`` → ``tables`` → ``assembly``
 → ``render`` (in this order; downstream depends on upstream artifacts) via
